@@ -1,0 +1,69 @@
+name: Run schemaChange
+description: Runs schemaChange
+inputs:
+  workspace:
+    required: true
+    description: The GITHUB_WORKSPACE
+  working-directory:
+    description: The directory where the schemaChange is located
+    required: true
+  migrations-directory:
+    description: The directory where the schemaChange migrations are located
+    required: true
+  snowflake-account:
+    description: The snowflake account to use
+    required: true
+  snowflake-username:
+    description: The snowflake username to use
+    required: true
+  snowflake-password:
+    description: The snowflake password to use
+    required: true
+  snowflake-role:
+    description: The snowflake role to use
+    required: true
+  snowflake-warehouse:
+    description: The snowflake warehouse to use
+    required: true
+  snowflake-target-database:
+    description: The snowflake target database to use
+    required: true
+  snowflake-target-changehistory:
+    description: The snowflake target changehistory to use
+    required: true
+  data-lake-url:
+    description: The data-lake-url to use
+    required: false
+  storage-integration-name:
+    description: The storage integration name to use
+    required: false
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run schemachange
+      shell: bash
+      run: |
+          echo "GITHUB_WORKSPACE: ${{ inputs.workspace }}"
+          echo "snowflake-target-database: ${{ inputs.snowflake-target-database }}"
+          echo "snowflake-target-changehistory: ${{ inputs.snowflake-target-changehistory }}"
+          schemachange -f ${{ inputs.workspace }}/schemachange/${{ inputs.migrations-directory }} \
+            -a ${{ inputs.snowflake-account }} \
+            -u ${{ inputs.snowflake-username }} \
+            -r ${{ inputs.snowflake-role }} \
+            -w ${{ inputs.snowflake-warehouse }} \
+            -d ${{ inputs.snowflake-target-database }} \
+            -c ${{ inputs.snowflake-target-changehistory }} \
+            --create-change-history-table
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        SCHEMACHANGE_WORK_DIR: ${{ inputs.working-directory }}
+        MIGRATIONS_FOLDER: ${{ inputs.migrations-directory }}
+        SNOWFLAKE_ACCOUNT: ${{ inputs.snowflake-account }}
+        SNOWFLAKE_PASSWORD: ${{ inputs.snowflake-password }}
+        SNOWFLAKE_ROLE: ${{ inputs.snowflake-role }}
+        SNOWFLAKE_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        SNOWFLAKE_DATABASE: ${{ inputs.snowflake-target-database }}
+        DATA_LAKE_URL: ${{ inputs.data-lake-url }}
+        STORAGE_INTEGRATION_NAME: ${{ inputs.storage-integration-name }}

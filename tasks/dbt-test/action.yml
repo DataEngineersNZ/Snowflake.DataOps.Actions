@@ -1,0 +1,48 @@
+name: Run DBT
+description: Runs DBT
+inputs:
+  target:
+    required: true
+    type: string
+  working-directory:
+    required: true
+    type: string
+  profiles-directory:
+    required: true
+    type: string
+  snowflake-account:
+    required: true
+    type: string
+  snowflake-username:
+    required: true
+    type: string
+  snowflake-password:
+    required: true
+    type: string
+  snowflake-role:
+    required: true
+    type: string
+  snowflake-warehouse:
+    required: true
+    type: string
+  snowflake-target-database:
+    required: true
+    type: string
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run DBT Tests
+      if: ${{ inputs.target }} != 'unit-test'
+      shell: bash
+      run: |
+        dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:halfhourly tag:hourly tag:bihourly tag:unit_test
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        SF_ACCOUNT: ${{ inputs.snowflake-account }}
+        SF_USERNAME: ${{ inputs.snowflake-username }}
+        SF_ROLE: ${{ inputs.snowflake-role }}
+        SF_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        SF_DATABASE: ${{ inputs.snowflake-target-database }}
+        SF_PASSWORD: ${{ inputs.snowflake-password }}

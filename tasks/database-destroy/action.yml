@@ -1,0 +1,55 @@
+name: Removes Unit Test Database
+description: Drops the unit-test database
+inputs:
+  working-directory:
+    description: The directory where the scripts are located
+    required: true
+  target-database:
+    description: The target database name to clone to
+    required: true
+  snowflake-account:
+    description: The Snowflake account name
+    required: true
+  snowflake-username:
+    description: The Snowflake username
+    required: true
+  snowflake-password:
+    description: The Snowflake password
+    required: true
+  snowflake-role:
+    description: The Snowflake role
+    required: true
+  snowflake-warehouse:
+    description: The Snowflake warehouse
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Find and replace target
+      run: |
+        sed -i 's/TARGET_DATABASE_NAME/${{ inputs.target-database }}/g' database-destroy.sql
+      shell: pwsh
+      working-directory: ${{ inputs.working-directory }}
+    - name: Download SnowSQL
+      shell: bash
+      run:  curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.9-linux_x86_64.bash
+    - name: Install SnowSQL
+      shell: bash
+      run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
+    - name: Execute SQL against Snowflake
+      shell: bash    
+      run: |
+         ~/snowflake/snowsql \
+            -a $SNOWSQL_ACCOUNT \
+            -u $SNOWSQL_USER \
+            -w $SNOWSQL_WAREHOUSE \
+            -f database-destroy.sql
+      env:
+        SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
+        SNOWSQL_USER: ${{ inputs.snowflake-username }}
+        SNOWSQL_PWD: ${{ inputs.snowflake-password }}
+        SNOWSQL_DATABASE: ${{ inputs.target-database }}
+        SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+      working-directory: ${{ inputs.working-directory }}
+

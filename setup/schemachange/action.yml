@@ -1,0 +1,20 @@
+name: Schemachange Setup
+description: Setups Schemachange Components
+inputs:
+  working-directory:
+    description: The directory where the Schemachange project is located
+    required: true
+    default: './schemachange'
+
+runs:
+  using: "composite"
+  steps:
+    - name: install Python
+      uses: "actions/setup-python@v2"
+      with:
+        python-version: 3.8
+
+    - name: install components
+      shell: bash
+      run: pip install -r .deployrequirements
+      working-directory: ${{ inputs.working-directory }}

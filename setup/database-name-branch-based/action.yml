@@ -1,0 +1,47 @@
+name: Determine the deployment database name
+description: Geneates the database in which to deploy into
+inputs:
+  source-database-name:
+    description: The root name of the database to copy from (excluding dev, test, prod)
+    required: true
+  include-branch:
+    description: Whether to include the branch name in the database name
+    required: false
+    default: $true
+outputs:
+  database-name:
+    description: The name of the database to use for deployment
+    value: ${{ steps.determine-database-name.outputs.database-name }}
+runs:
+  using: "composite"
+  steps:
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request' && include-branch == $true
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request' && include-branch == $true
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+
+      - name: BRANCH_NAME
+        id: determine-database-name
+        if: include-branch == $true
+        shell: bash
+        run: |
+          echo "::set-output name=database-name::${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }}"
+
+      - name: BRANCH_NAME
+        id: determine-database-name
+        if: include-branch == $false
+        shell: bash
+        run: |
+          echo "::set-output name=database-name::${{ inputs.source-database-name }}"
+
+      - name: show target name
+        shell: bash
+        run: |
+          echo "Target: ${{ steps.determine-database-name.outputs.database-name }}"

@@ -1,0 +1,26 @@
+name: Linting
+description: Setups and Lints path provided
+inputs:
+  working-directory:
+    description: The directory where the project is located
+    required: true
+  linting-directory:
+    description: The directory where the linting should occue
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: setup sql fluff
+      shell: bash
+      run: |
+        apt-get update && apt-get install gettext-base -y
+        envsubst < .sqlfluffconfig | cat > .sqlfluff
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: sql fluff dbt models
+      shell: bash
+      id: sqlfluff_json
+      run: |
+        sqlfluff lint ${{ inputs.linting-directory }}
+      working-directory: ${{ inputs.working-directory }}

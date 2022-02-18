@@ -1,0 +1,27 @@
+name: Prepare Unit Test Database
+description: Creates a new Database name for unit testing
+inputs:
+  source-database-name:
+    description: The name of the database to copy from
+    required: true
+outputs:
+  unit-test-database:
+    description: The name of the database to use for unit testing
+    value: ${{ steps.create-database-name.outputs.database-name }}
+runs:
+  using: "composite"
+  steps:
+    - name: create new unit test database name
+      id: create-database-name
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install uuid -y
+        # Set DB Name
+        DB_NAME=$(uuid | tr '-' '_')
+        echo "::set-output name=database-name::${{ inputs.source-database-name }}_UT_$(echo $DB_NAME)"
+
+    - name: show target name
+      shell: bash
+      run: |
+          echo "Target: ${{ steps.create-database-name.outputs.database-name }}"

@@ -1,0 +1,50 @@
+name: Run DBT
+description: Runs DBT
+inputs:
+  target:
+    description: The target to run DBT against
+    required: true
+  tag:
+    description: The tag to apply
+    required: true
+  working-directory:
+    description: The directory where the DBT project is located
+    required: true
+  profiles-directory:
+    description: The directory where the DBT profiles are located
+    required: true
+  snowflake-account:
+    description: The snowflake account to use
+    required: true
+  snowflake-username:
+    description: The snowflake username to use
+    required: true
+  snowflake-password:
+    description: The snowflake password to use
+    required: true
+  snowflake-role:
+    description: The snowflake role to use
+    required: true
+  snowflake-warehouse:
+    description: The snowflake warehouse to use
+    required: true
+  snowflake-target-database:
+    description: The snowflake target database to use
+    required: true
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run DBT
+      shell: bash
+      run: |
+        dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} -models tag:${{ inputs.tag }}
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        snowflake-account: ${{ inputs.snowflake-account }}
+        snowflake-username: ${{ inputs.snowflake-username }}
+        snowflake-role: ${{ inputs.snowflake-role }}
+        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
+        snowflake-target-database: ${{ inputs.snowflake-target-database }}
+        snowflake-password: ${{ inputs.snowflake-password }}
