@@ -16,30 +16,35 @@ runs:
   using: "composite"
   steps:
       - name: Get branch name (merge)
-        if: github.event_name != 'pull_request' && include-branch == $true
+        if: github.event_name != 'pull_request' && ${{ inputs.include-branch }}
         shell: bash
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
 
       - name: Get branch name (pull request)
-        if: github.event_name == 'pull_request' && include-branch == $true
+        if: github.event_name == 'pull_request' && ${{ inputs.include-branch }}
         shell: bash
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
-      - name: BRANCH_NAME
-        id: determine-database-name
-        if: include-branch == $true
+      - name: Determine new database name with branch attached
+        if: ${{ inputs.include-branch }}
         shell: bash
         run: |
-          echo "::set-output name=database-name::${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }}"
+          echo "DATABASE_NAME=$(echo ${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }}" | tr / -)" >> $GITHUB_ENV
+
+      - name: Determine new database name with no branch
+        if: ${{ inputs.include-branch }} == $false
+        shell: bash
+        run: |
+          echo "DATABASE_NAME=$(echo ${{ inputs.source-database-name }}" | tr / -)" >> $GITHUB_ENV
 
       - name: BRANCH_NAME
         id: determine-database-name
-        if: include-branch == $false
         shell: bash
         run: |
-          echo "::set-output name=database-name::${{ inputs.source-database-name }}"
+          echo "::set-output name=database-name::${{ env.DATABASE_NAME }}"
+
 
       - name: show target name
         shell: bash
