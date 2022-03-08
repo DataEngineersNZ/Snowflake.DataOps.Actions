@@ -2,12 +2,8 @@ name: Determine the deployment database name
 description: Geneates the database in which to deploy into
 inputs:
   source-database-name:
-    description: The root name of the database to copy from (excluding dev, test, prod)
+    description: The root name of the database to use (excluding dev, test, prod)
     required: true
-  include-branch:
-    description: Whether to include the branch name in the database name
-    required: false
-    default: $true
 outputs:
   database-name:
     description: The name of the database to use for deployment
@@ -16,35 +12,22 @@ runs:
   using: "composite"
   steps:
       - name: Get branch name (merge)
-        if: github.event_name != 'pull_request' && ${{ inputs.include-branch }}
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
 
       - name: Get branch name (pull request)
-        if: github.event_name == 'pull_request' && ${{ inputs.include-branch }}
+        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
-
-      - name: Determine new database name with branch attached
-        if: ${{ inputs.include-branch }}
-        shell: bash
-        run: |
-          echo "DATABASE_NAME=$(echo ${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }}.toUpperCase() | tr / -)" >> $GITHUB_ENV
-
-      - name: Determine new database name with no branch
-        if: ${{ inputs.include-branch }} == $false
-        shell: bash
-        run: |
-          echo "DATABASE_NAME=$(echo ${{ inputs.source-database-name }} | tr / -)" >> $GITHUB_ENV
 
       - name: BRANCH_NAME
         id: determine-database-name
         shell: bash
         run: |
-          echo "::set-output name=database-name::${{ env.DATABASE_NAME }}"
-
+          echo "::set-output name=database-name::$(echo ${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }} | tr a-z A-Z)"
 
       - name: show target name
         shell: bash
