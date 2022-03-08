@@ -31,7 +31,7 @@ runs:
         if: ${{ inputs.include-branch }}
         shell: bash
         run: |
-          echo "DATABASE_NAME=$(echo ${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }} | tr / -)" >> $GITHUB_ENV
+          echo "DATABASE_NAME=$(echo ${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }}.toUpperCase() | tr / -)" >> $GITHUB_ENV
 
       - name: Determine new database name with no branch
         if: ${{ inputs.include-branch }} == $false
