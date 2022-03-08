@@ -40,9 +40,9 @@ runs:
         dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:halfhourly tag:hourly tag:bihourly tag:unit_test
       working-directory: ${{ inputs.working-directory }}
       env:
-        SF_ACCOUNT: ${{ inputs.snowflake-account }}
-        SF_USERNAME: ${{ inputs.snowflake-username }}
-        SF_ROLE: ${{ inputs.snowflake-role }}
-        SF_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
-        SF_DATABASE: ${{ inputs.snowflake-target-database }}
-        SF_PASSWORD: ${{ inputs.snowflake-password }}
+        snowflake-account: ${{ inputs.snowflake-account }}
+        snowflake-username: ${{ inputs.snowflake-username }}
+        snowflake-role: ${{ inputs.snowflake-role }}
+        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
+        snowflake-target-database: ${{ inputs.snowflake-target-database }}
+        snowflake-password: ${{ inputs.snowflake-password }}
