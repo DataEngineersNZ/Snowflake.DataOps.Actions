@@ -32,10 +32,27 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Run DBT
+    - name: Run DBT without Unit-tets
+      if: inputs.target  != 'unit-test'
       shell: bash
       run: |
+        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude path:seeds/unit_tests
         dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:unit_test
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        snowflake-account: ${{ inputs.snowflake-account }}
+        snowflake-username: ${{ inputs.snowflake-username }}
+        snowflake-role: ${{ inputs.snowflake-role }}
+        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
+        snowflake-target-database: ${{ inputs.snowflake-target-database }}
+        snowflake-password: ${{ inputs.snowflake-password }}
+
+    - name: Run DBT with unit-tests
+      if: inputs.target  == 'unit-test'
+      shell: bash
+      run: |
+        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
+        dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
