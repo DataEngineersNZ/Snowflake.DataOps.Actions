@@ -45,10 +45,9 @@ runs:
       run: |
         sed -i 's/<<TARGET_DATABASE_NAME>>/${{ inputs.target-database }}/g' database-clone.sql
         sed -i 's/<<SOURCE_DATABASE_NAME>>/${{ inputs.source-database }}/g' database-clone.sql
-        sed -i 's/<<CLONE_DATABASE_COMMENT>>/${{ inputs.source-database }}/g' database-clone.sql
+        sed -i 's/<<CLONE_DATABASE_COMMENT>>/${{ inputs.database-comment }}/g' database-clone.sql
         sed -i 's/<<STORAGE_INTEGRATION_NAME>>/${{ inputs.storage-integration-name }}/g' database-clone.sql
         sed -i 's/<<STORAGE_ACCOUNT_NAME>>/${{ inputs.storage-account-name }}/g' database-clone.sql
-        sed -i 's/<<CLONE_DATABASE_COMMENT>>/${{ inputs.database-comment }}/g' database-clone.sql
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
     - name: Download SnowSQL
