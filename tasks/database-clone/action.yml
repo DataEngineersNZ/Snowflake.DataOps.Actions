@@ -31,14 +31,23 @@ inputs:
   storage-integration-name:
     description: The Storage Integration Name
     required: false
+  storage-account-name:
+    description: The Storage Account Name for Storeage Integration URL 
+    required: false
+  database-comment:
+    description: The Comment to add to the clone database
+    required: false
 
 runs:
   using: "composite"
   steps:
-    - name: Find and replace target & source database name
+    - name: Find and replace the placeholders
       run: |
-        sed -i 's/TARGET_DATABASE_NAME/${{ inputs.target-database }}/g' database-clone.sql
-        sed -i 's/SOURCE_DATABASE_NAME/${{ inputs.source-database }}/g' database-clone.sql
+        sed -i 's/<<TARGET_DATABASE_NAME>>/${{ inputs.target-database }}/g' database-clone.sql
+        sed -i 's/<<SOURCE_DATABASE_NAME>>/${{ inputs.source-database }}/g' database-clone.sql
+        sed -i 's/<<CLONE_DATABASE_COMMENT>>/${{ inputs.source-database }}/g' database-clone.sql
+        sed -i 's/<<STORAGE_INTEGRATION_NAME>>/${{ inputs.storage-integration-name }}/g' database-clone.sql
+        sed -i 's/<<STORAGE_ACCOUNT_NAME>>/${{ inputs.storage-account-name }}/g' database-clone.sql
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
     - name: Download SnowSQL
