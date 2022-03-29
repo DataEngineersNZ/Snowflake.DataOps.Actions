@@ -29,15 +29,28 @@ inputs:
     required: true
     type: string
 
-
 runs:
   using: "composite"
   steps:
-    - name: Run DBT Tests
-      if: ${{ inputs.target }} != 'unit-test'
+    - name: Run DBT Schema Only Tests
+      if: inputs.target  != 'unit-test'
       shell: bash
       run: |
-        dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:halfhourly tag:hourly tag:bihourly tag:unit_test
+        dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        snowflake-account: ${{ inputs.snowflake-account }}
+        snowflake-username: ${{ inputs.snowflake-username }}
+        snowflake-role: ${{ inputs.snowflake-role }}
+        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
+        snowflake-target-database: ${{ inputs.snowflake-target-database }}
+        snowflake-password: ${{ inputs.snowflake-password }}
+
+    - name: Run DBT Schema Tests and unit-tests
+      if: inputs.target  == 'unit-test'
+      shell: bash
+      run: |
+        dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
