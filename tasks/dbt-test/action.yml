@@ -3,31 +3,31 @@ description: Runs DBT
 inputs:
   target:
     required: true
-    type: string
+    description: The target to run DBT against
   working-directory:
     required: true
-    type: string
+    description: The directory where the DBT project is located
   profiles-directory:
     required: true
-    type: string
+    description: The directory where the DBT profiles are located
   snowflake-account:
     required: true
-    type: string
+    description: The snowflake account to use
   snowflake-username:
     required: true
-    type: string
+    description: The snowflake username to use
   snowflake-password:
     required: true
-    type: string
+    description: The snowflake password to use
   snowflake-role:
     required: true
-    type: string
+    description: The snowflake role to use
   snowflake-warehouse:
     required: true
-    type: string
+    description: The snowflake warehouse to use
   snowflake-target-database:
     required: true
-    type: string
+    description: The snowflake target database to use
 
 runs:
   using: "composite"
