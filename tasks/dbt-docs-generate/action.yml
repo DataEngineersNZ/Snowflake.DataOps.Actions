@@ -50,6 +50,6 @@ runs:
       with:
           name: dbt-docs
           path: |
-            ./dbt/target/catalog.json
-            ./dbt/target/index.html
-            ./dbt/target/manifest.json
+            ${{ inputs.working-directory }}/target/catalog.json
+            ${{ inputs.working-directory }}/target/index.html
+            ${{ inputs.working-directory }}/target/manifest.json

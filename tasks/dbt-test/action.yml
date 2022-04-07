@@ -59,3 +59,10 @@ runs:
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
         snowflake-password: ${{ inputs.snowflake-password }}
+
+    - name: Archive Dbt Test Results
+      uses: actions/upload-artifact@v3
+      with:
+          name: dbt-test-results
+          path: 
+            ${{ inputs.working-directory }}/target/run_results.json

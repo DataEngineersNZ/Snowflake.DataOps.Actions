@@ -1,0 +1,100 @@
+name: Upload Dbt Docs to Azure Storage
+description: Uploads the documents required for the Dbt docs to Azure Storage
+inputs:
+  azure_credentials:
+    description: The azure azure_credentials to be used 
+    required: true
+  target-directory:
+    description: The directory where the DBT output is located
+    required: true
+  working-directory:
+    description: The directory where dbt is located
+    required: true
+  resource-group:
+    description: The resource group where the storage account is located
+    required: true
+  storage-account:
+    description: The name of the storage account
+    required: true
+  container:
+    description: The name of the storage container
+    required: false
+    default: '$web'
+  branchBasedFolder:
+    description: The sub folder to add the files to in the storage account
+    required: false
+    default: 'yes'
+
+runs:
+  using: "composite"
+  steps:
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+
+      - name: Authenticate to Azure as a Service Principal
+        uses: azure/login@v1
+        with:
+          creds: ${{ inputs.azure_credentials }}           
+
+      - name: Find and replace the placeholders
+        shell: pwsh
+        run: |
+          sed -i 's/<<BRANCH_NAME>>/${{ env.BRANCH_NAME }}/g' manifest.json
+          sed -i 's/Welcome to the auto-generated documentation for your dbt project!/Welcome to the auto-generated documentation for your dbt project for the ${{ env.BRANCH_NAME }} branch!/g ' manifest.json
+        working-directory: ${{ inputs.working-directory }}/${{ inputs.target-directory }}
+
+
+      - name: Upload DBT Docs to subfolder
+        uses: azure/CLI@v1
+        if: inputs.branchBasedFolder == 'yes'
+        with:
+          inlineScript: |
+              myIP=$(curl -sL http://ipinfo.io/json | jq -r '.ip')
+              echo "Adding this IP address to rules: $myIP"
+              echo "AGENT_IP=$(echo $myIP | tr / -)" >> $GITHUB_ENV
+              az storage account network-rule add --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address $myIP
+              az storage account show -n ${{ inputs.storage-account }} --query networkRuleSet
+              echo " ==> Sleep for 30 seconds to allow the firewall change to take "
+              sleep 30
+              az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/manifest.json' --content-type 'application/json' --overwrite
+              az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/catalog.json' --content-type 'application/json' --overwrite
+              az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/index.html' --content-type 'text/html' --overwrite
+
+      - name: Upload DBT Docs
+        uses: azure/CLI@v1
+        if: inputs.branchBasedFolder == 'no'
+        with:
+          inlineScript: |
+              myIP=$(curl -sL http://ipinfo.io/json | jq -r '.ip')
+              echo "Adding this IP address to rules: $myIP"
+              echo "AGENT_IP=$(echo $myIP | tr / -)" >> $GITHUB_ENV
+              az storage account network-rule add --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address $myIP
+              echo " ==> Sleep for 30 seconds to allow the firewall change to take "
+              sleep 30
+              az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json' -c '${{inputs.container}}' -n 'manifest.json' --content-type 'application/json' --overwrite
+              az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json' -c '${{inputs.container}}' -n 'catalog.json' --content-type 'application/json' --overwrite
+              az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n 'index.html' --content-type 'text/html' --overwrite
+
+      - name: add the IP address of the agent to the allowed list
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          inlineScript: |
+            echo "Remove this IP address from the rules: ${{ env.AGENT_IP}}"
+            az storage account network-rule remove --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address ${{ env.AGENT_IP}}
+
+      # Azure logout
+      - name: logout
+        shell: bash
+        run: |
+              az logout
+        if: always()
