@@ -28,7 +28,7 @@ runs:
           inlineScript: |
               if (az storage blob exists --container-name 'manifests' --name ${{ inputs.snowflake-target-database }}_manifest.json --account-name ${{ inputs.storage-account }} --auth-mode login)
               then
-                echo " ==> DBT manifest exists in the container, copying file"
+                echo " ==> DBT manifest exists in the container, deleting file"
                 az storage blob delete \
                   --account-name ${{ inputs.storage-account }} \
                   --container-name 'manifests' \
