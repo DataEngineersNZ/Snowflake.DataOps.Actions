@@ -1,5 +1,5 @@
-name: Upload Dbt Docs to Azure Storage
-description: Uploads the documents required for the Dbt docs to Azure Storage
+name: Publish Dbt Docs to Azure Storage
+description: Publish the dbt docs to Azure Storage
 inputs:
   azure_credentials:
     description: The azure azure_credentials to be used 
@@ -40,6 +40,12 @@ runs:
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
+      - name: Get Manifest and Catalog Paths
+        shell: bash
+        run: |
+          echo "MANIFEST_FILE=$(echo ${{ env.BRANCH_NAME }}/manifest.json)" >> $GITHUB_ENV
+          echo "CATALOG_FILE=$(echo ${{ env.BRANCH_NAME }}/catalog.json)" >> $GITHUB_ENV
+
       - name: Authenticate to Azure as a Service Principal
         uses: azure/login@v1
         with:
@@ -48,8 +54,11 @@ runs:
       - name: Find and replace the placeholders
         shell: pwsh
         run: |
-          sed -i 's/<<BRANCH_NAME>>/${{ env.BRANCH_NAME }}/g' manifest.json
-          sed -i 's/Welcome to the auto-generated documentation for your dbt project!/Welcome to the auto-generated documentation for your dbt project for the ${{ env.BRANCH_NAME }} branch!/g ' manifest.json
+          sed -i 's|<<BRANCH_NAME>>|${{ env.BRANCH_NAME }}|g' manifest.json
+          if("${{ inputs.branchBasedFolder }}" -eq "yes") {
+            sed -i 's|manifest.json|${{ env.MANIFEST_FILE }}|g' index.html
+            sed -i 's|catalog.json|${{ env.CATALOG_FILE }}|g' index.html
+          }
         working-directory: ${{ inputs.working-directory }}/${{ inputs.target-directory }}
 
 

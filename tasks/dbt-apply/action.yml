@@ -34,10 +34,16 @@ runs:
   steps:
     - name: Run DBT without Unit-tets
       if: inputs.target  != 'unit-test'
-      shell: bash
+      shell: pwsh
       run: |
-        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude path:seeds/unit_tests
-        dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:unit_test
+        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude path:seeds/unit_tests 
+        if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
+          echo " ==> Previous Manifest file found, running dbt run for release"  
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:unit_test 
+        } else {
+            echo " ==> No Previous Manifest file found, running dbt run fo release"  
+            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:unit_test 
+        }
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
@@ -49,10 +55,17 @@ runs:
 
     - name: Run DBT with unit-tests
       if: inputs.target  == 'unit-test'
-      shell: bash
+      shell: pwsh
       run: |
         dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
-        dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily
+        if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
+          echo " ==> Previous Manifest file found, running dbt run for unit tests"  
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily
+        } else {
+          echo " ==> No Previous Manifest file found, running dbt run for unit tests"  
+          dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily
+        }
+
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}

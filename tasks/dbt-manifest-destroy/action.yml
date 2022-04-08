@@ -1,0 +1,45 @@
+name: Removes the Manifest for the database
+description: Removes an existing dbt manifest.json from the storage account
+inputs:
+  azure_credentials:
+    description: The azure azure_credentials to be used 
+    required: true
+  resource-group:
+    description: The resource group where the storage account is located
+    required: true
+  storage-account:
+    description: The name of the storage account
+    required: true
+  snowflake-target-database:
+    description: The name of the database to set the manifest for
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - name: Authenticate to Azure as a Service Principal
+        uses: azure/login@v1
+        with:
+          creds: ${{ inputs.azure_credentials }}           
+
+      - name: Clone Manifest file
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+              if (az storage blob exists --container-name 'manifests' --name ${{ inputs.snowflake-target-database }}_manifest.json --account-name ${{ inputs.storage-account }} --auth-mode login)
+              then
+                echo " ==> DBT manifest exists in the container, copying file"
+                az storage blob delete \
+                  --account-name ${{ inputs.storage-account }} \
+                  --container-name 'manifests' \
+                  --name '${{ inputs.snowflake-target-database }}_manifest.json' \
+                  --delete-snapshots include \
+                  --auth-mode login  
+              fi
+   
+      # Azure logout
+      - name: logout
+        shell: bash
+        run: |
+              az logout
+        if: always()

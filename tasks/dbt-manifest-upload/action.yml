@@ -1,0 +1,55 @@
+name: Upload Manifest File to Azure Storage
+description: Uploads the dbt manifest.json to Azure Storage
+inputs:
+  azure_credentials:
+    description: The azure azure_credentials to be used 
+    required: true
+  target-directory:
+    description: The directory where the DBT output is located
+    required: true
+  working-directory:
+    description: The directory where dbt is located
+    required: true
+  resource-group:
+    description: The resource group where the storage account is located
+    required: true
+  storage-account:
+    description: The name of the storage account
+    required: true
+  snowflake-target-database:
+    description: The name of the database to get the manifest for
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - name: Authenticate to Azure as a Service Principal
+        uses: azure/login@v1
+        with:
+          creds: ${{ inputs.azure_credentials }}           
+
+      - name: Upload DBT Manifest for database
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+              az storage blob upload --account-name ${{ inputs.storage-account }} \
+              --auth-mode login  \
+              -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json' \
+              -c 'manifests' -n '${{ env.snowflake-target-database }}_manifest.json' \
+              --content-type 'application/json' \
+              --overwrite
+
+      - name: add the IP address of the agent to the allowed list
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          inlineScript: |
+            echo "Remove this IP address from the rules: ${{ env.AGENT_IP}}"
+            az storage account network-rule remove --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address ${{ env.AGENT_IP}}
+
+      # Azure logout
+      - name: logout
+        shell: bash
+        run: |
+              az logout
+        if: always()
