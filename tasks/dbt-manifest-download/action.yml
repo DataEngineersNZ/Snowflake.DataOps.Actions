@@ -32,7 +32,7 @@ runs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-              if (az storage blob exists --container-name 'manifests' --name ${{ inputs.snowflake-target-database }}_manifest.json --account-name ${{ inputs.storage-account }} --auth-mode login)
+              if $(az storage blob exists --container-name 'manifests' --name ${{ inputs.snowflake-target-database }}_manifest.json --account-name ${{ inputs.storage-account }} --query exists --auth-mode login)
               then
                 echo " ==> DBT manifest exists in the container, downloading"
                 az storage blob download --account-name ${{ inputs.storage-account }} --auth-mode login --container 'manifests' --name '${{ inputs.snowflake-target-database }}_manifest.json' --file '${{ inputs.working-directory }}/manifest.json'
