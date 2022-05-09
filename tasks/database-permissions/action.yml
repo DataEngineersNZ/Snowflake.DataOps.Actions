@@ -5,7 +5,10 @@ inputs:
     description: The directory where the scripts are located
     required: true
   target-database:
-    description: The target database name to clone to
+    description: The target database name to apply permissions to
+    required: true
+  target-ownership:
+    description: The target ownership of the database
     required: true
   snowflake-account:
     description: The Snowflake account name
@@ -29,6 +32,7 @@ runs:
     - name: Find and replace the placeholders
       run: |
         sed -i 's/<<TARGET_DATABASE_NAME>>/${{ inputs.target-database }}/g' database-permissions.sql
+        sed -i 's/<<TARGET_OWNERSHIP_ROLE>>/${{ inputs.target-ownership }}/g' database-permissions.sql
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
     - name: Download SnowSQL
