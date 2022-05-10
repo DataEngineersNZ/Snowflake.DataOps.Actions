@@ -41,6 +41,69 @@ runs:
     - name: Install SnowSQL
       shell: bash
       run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
+
+    - name: Get Schemas
+      shell: bash
+      run: |
+        ~/snowflake/snowsql \
+            -a $SNOWSQL_ACCOUNT \
+            -u $SNOWSQL_USER \
+            -d $SNOWSQL_DATABASE \
+            -w $SNOWSQL_WAREHOUSE \
+            -r $SNOWSQL_ROLE \
+            -q "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME<>'INFORMATION_SCHEMA'" \
+            -o output_file=./schemaresults.json \
+            -o output_format=json \
+            -o friendly=false
+      env:
+        SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
+        SNOWSQL_USER: ${{ inputs.snowflake-username }}
+        SNOWSQL_PWD: ${{ inputs.snowflake-password }}
+        SNOWSQL_DATABASE: ${{ inputs.target-database}}
+        SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
+        SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        OWNERSHIP_ROLE: ${{ inputs.target-ownership }}
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Update Schema Permissions Script
+      shell: pwsh
+      run: |
+        $statements = [Collections.Generic.List[string]]::New()
+        $new_role = "${{ inputs.target-ownership }}"
+        $fileName = "./schemaresults.json"
+
+        $schemaObjects = Get-Content -Raw -Path $fileName | ConvertFrom-Json
+        
+        $schemaObjects |  ForEach-Object {
+            $schema=  $_.SCHEMA_NAME.toLower()
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON SCHEMA ", $schema , " TO ROLE ",$new_role, " REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT USAGE ON SCHEMA ", $schema , " TO ROLE " , $new_role,";"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL TABLES IN SCHEMA  ", $schema, " TO ROLE " , $new_role , " REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL VIEWS IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL STAGES IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL FILE FORMATS IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL FUNCTIONS IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL SEQUENCES IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL EXTERNAL TABLES IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL MATERIALIZED VIEWS IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL PROCEDURES IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL STREAMS IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON ALL TASKS IN SCHEMA ", $schema, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+        }
+        $statements | Out-File -Append database-permissions.sql -Encoding utf8
+
+      env:
+        OWNERSHIP_ROLE: ${{ inputs.target-ownership }}
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Archive Permission Details
+      uses: actions/upload-artifact@v3
+      with:
+          name: permissions
+          path: |
+            ${{ inputs.working-directory }}/database-permissions.sql
+            ${{ inputs.working-directory }}/schemaresults.json
+
     - name: Execute SQL against Snowflake
       shell: bash    
       run: |
