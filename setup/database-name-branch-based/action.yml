@@ -8,6 +8,9 @@ outputs:
   database-name:
     description: The name of the database to use for deployment
     value: ${{ steps.determine-database-name.outputs.database-name }}
+  target-name:
+    description: The name of the current branch to target
+    value: ${{ steps.determine-branch-name.outputs.target-name }}
 runs:
   using: "composite"
   steps:
@@ -29,7 +32,14 @@ runs:
         run: |
           echo "::set-output name=database-name::$(echo ${{ inputs.source-database-name }}_${{ env.BRANCH_NAME }} | tr a-z A-Z)"
 
+      - name: TARGET_NAME
+        id: determine-branch-name
+        shell: bash
+        run: |
+          echo "::set-output name=target-name::$(echo ${{ env.BRANCH_NAME }})"
+
       - name: show target name
         shell: bash
         run: |
-          echo "Target: ${{ steps.determine-database-name.outputs.database-name }}"
+          echo "Database: ${{ steps.determine-database-name.outputs.database-name }}"
+          echo "Target: ${{ steps.determine-branch-name.outputs.target-name }}"

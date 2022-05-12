@@ -1,9 +1,9 @@
-name: Returns the current branch name
-description: Returns the current branch name
+name: Determine the deployment target name
+description: Target name of the profile to use
 outputs:
-  branch-name:
-    description: The name of the current branch
-    value: ${{ steps.determine-branch-name.outputs.branch-name }}
+  target-name:
+    description: The name of the current branch to target
+    value: ${{ steps.determine-branch-name.outputs.target-name }}
 runs:
   using: "composite"
   steps:
@@ -19,8 +19,13 @@ runs:
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
-      - name: BRANCH_NAME
+      - name: TARGET_NAME
         id: determine-branch-name
         shell: bash
         run: |
-          echo "::set-output name=branch-name::$(echo ${{ env.BRANCH_NAME }} | tr a-z A-Z)"
+          echo "::set-output name=target-name::$(echo ${{ env.BRANCH_NAME }})"
+
+      - name: show target name
+        shell: bash
+        run: |
+          echo "Target: ${{ steps.determine-branch-name.outputs.target-name }}"
