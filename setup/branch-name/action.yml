@@ -1,0 +1,26 @@
+name: Returns the current branch name
+description: Returns the current branch name
+outputs:
+  branch-name:
+    description: The name of the current branch
+    value: ${{ steps.determine-branch-name.outputs.branch-name }}
+runs:
+  using: "composite"
+  steps:
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+
+      - name: BRANCH_NAME
+        id: determine-branch-name
+        shell: bash
+        run: |
+          echo "::set-output name=branch-name::$(echo ${{ env.BRANCH_NAME }} | tr a-z A-Z)"
