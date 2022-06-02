@@ -44,6 +44,7 @@ runs:
             -a $SNOWSQL_ACCOUNT \
             -u $SNOWSQL_USER \
             -w $SNOWSQL_WAREHOUSE \
+            -r $SNOWSQL_ROLE \
             -f database-destroy.sql
       env:
         SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
@@ -51,5 +52,6 @@ runs:
         SNOWSQL_PWD: ${{ inputs.snowflake-password }}
         SNOWSQL_DATABASE: ${{ inputs.target-database }}
         SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
       working-directory: ${{ inputs.working-directory }}
 
