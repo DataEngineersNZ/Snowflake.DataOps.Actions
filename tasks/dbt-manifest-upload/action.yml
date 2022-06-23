@@ -35,7 +35,7 @@ runs:
               az storage blob upload --account-name ${{ inputs.storage-account }} \
               --auth-mode login  \
               -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json' \
-              -c 'manifests' -n '${{ env.snowflake-target-database }}_manifest.json' \
+              -c 'manifests' -n '${{ inputs.snowflake-target-database }}_manifest.json' \
               --content-type 'application/json' \
               --overwrite
 
