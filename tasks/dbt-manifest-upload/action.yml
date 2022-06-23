@@ -31,6 +31,7 @@ runs:
       - name: Upload DBT Manifest for database
         uses: azure/CLI@v1
         with:
+          azcliversion: latest
           inlineScript: |
               az storage blob upload --account-name ${{ inputs.storage-account }} \
               --auth-mode login  \
@@ -38,14 +39,6 @@ runs:
               -c 'manifests' -n '${{ inputs.snowflake-target-database }}_manifest.json' \
               --content-type 'application/json' \
               --overwrite
-
-      - name: add the IP address of the agent to the allowed list
-        uses: azure/CLI@v1
-        if: always()
-        with:
-          inlineScript: |
-            echo "Remove this IP address from the rules: ${{ env.AGENT_IP}}"
-            az storage account network-rule remove --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address ${{ env.AGENT_IP}}
 
       # Azure logout
       - name: logout
