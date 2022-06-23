@@ -28,7 +28,7 @@ runs:
   steps:
     - name: Find and replace target
       run: |
-        sed -i 's/TARGET_DATABASE_NAME/${{ inputs.target-database }}/g' database-destroy.sql
+        sed -i 's/<<TARGET_DATABASE_NAME>>/${{ inputs.target-database }}/g' database-destroy.sql
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
     - name: Download SnowSQL
