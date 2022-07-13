@@ -65,6 +65,32 @@ runs:
         OWNERSHIP_ROLE: ${{ inputs.target-ownership }}
       working-directory: ${{ inputs.working-directory }}
 
+    - name: Get Masking Policies
+      shell: bash
+      run: |
+        ~/snowflake/snowsql \
+            -a $SNOWSQL_ACCOUNT \
+            -u $SNOWSQL_USER \
+            -d $SNOWSQL_DATABASE \
+            -w $SNOWSQL_WAREHOUSE \
+            -r $SNOWSQL_ROLE \
+            -q "SHOW MASKING POLICIES IN DATABASE ${{ inputs.target-database }}" \
+            -o output_file=./maskingpolicies.json \
+            -o output_format=json \
+            -o friendly=false
+      env:
+        SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
+        SNOWSQL_USER: ${{ inputs.snowflake-username }}
+        SNOWSQL_PWD: ${{ inputs.snowflake-password }}
+        SNOWSQL_DATABASE: ${{ inputs.target-database}}
+        SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
+        SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        OWNERSHIP_ROLE: ${{ inputs.target-ownership }}
+      working-directory: ${{ inputs.working-directory }}
+
+
+
+
     - name: Update Schema Permissions Script
       shell: pwsh
       run: |
@@ -96,6 +122,31 @@ runs:
         OWNERSHIP_ROLE: ${{ inputs.target-ownership }}
       working-directory: ${{ inputs.working-directory }}
 
+
+
+    - name: Update Maskingpolicy Permissions Script
+      shell: pwsh
+      run: |
+        $statements = [Collections.Generic.List[string]]::New()
+        $new_role = "${{ inputs.target-ownership }}"
+        $fileName = "./maskingpolicies.json"
+
+        $schemaObjects = Get-Content -Raw -Path $fileName | ConvertFrom-Json
+        
+        $schemaObjects |  ForEach-Object {
+            $schema=  $_.SCHEMA_NAME.toLower()
+            $policy= $_.NAME.toLower()
+
+            $statements.Add(-JOIN("GRANT OWNERSHIP ON  MASKING POLICY ", $schema , ".",$policy, " TO ROLE " , $new_role," REVOKE CURRENT GRANTS;"))
+        }
+        $statements | Out-File -Append database-permissions.sql -Encoding utf8
+
+      env:
+        OWNERSHIP_ROLE: ${{ inputs.target-ownership }}
+      working-directory: ${{ inputs.working-directory }}
+
+
+
     - name: Archive Permission Details
       uses: actions/upload-artifact@v3
       with:
@@ -122,4 +173,3 @@ runs:
         SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
         SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
       working-directory: ${{ inputs.working-directory }}
-
