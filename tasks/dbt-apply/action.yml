@@ -36,13 +36,14 @@ runs:
       if: inputs.target  != 'unit-test'
       shell: pwsh
       run: |
+        dbt compile --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test 
         dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude path:seeds/unit_tests 
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
           echo " ==> Previous Manifest file found, running dbt run for release"  
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:unit_test 
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test 
         } else {
             echo " ==> No Previous Manifest file found, running dbt run fo release"  
-            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily tag:unit_test 
+            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test 
         }
       working-directory: ${{ inputs.working-directory }}
       env:
@@ -57,13 +58,14 @@ runs:
       if: inputs.target  == 'unit-test'
       shell: pwsh
       run: |
+        dbt compile --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
         dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
           echo " ==> Previous Manifest file found, running dbt run for unit tests"  
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
         } else {
           echo " ==> No Previous Manifest file found, running dbt run for unit tests"  
-          dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:daily
+          dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
         }
 
       working-directory: ${{ inputs.working-directory }}
