@@ -35,12 +35,13 @@ runs:
     - name: Clean target
       shell: pwsh
       run: |
-         if(Test-Path -Path ".\target\partial_parse.msgpack" -PathType Leaf) {
-            Remove-Item -Path ".\target\partial_parse.msgpack" -Force
+         if(Test-Path -Path "partial_parse.msgpack") {
+            Remove-Item -Path "partial_parse.msgpack" -Force
          }
-         if(Test-Path -Path ".\target\graph.gpickle" -PathType Leaf) {
-          Remove-Item -Path ".\target\graph.gpickle" -Force
+         if(Test-Path -Path "graph.gpickle") {
+          Remove-Item -Path "graph.gpickle" -Force
          }
+      working-directory: ${{ inputs.working-directory }}/target
 
     - name: Run DBT without Unit-tets
       if: inputs.target  != 'unit-test'
