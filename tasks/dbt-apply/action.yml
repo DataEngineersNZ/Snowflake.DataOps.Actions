@@ -32,6 +32,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Clean target
+      shell: pwsh
+      run: |
+         if(Test-Path -Path ".\target\partial_parse.msgpack" -PathType Leaf) {
+            Remove-Item -Path ".\target\partial_parse.msgpack" -Force
+         }
+         if(Test-Path -Path ".\target\graph.gpickle" -PathType Leaf) {
+          Remove-Item -Path ".\target\graph.gpickle" -Force
+         }
+
     - name: Run DBT without Unit-tets
       if: inputs.target  != 'unit-test'
       shell: pwsh
