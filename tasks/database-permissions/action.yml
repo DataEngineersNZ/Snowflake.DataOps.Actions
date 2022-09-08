@@ -25,6 +25,10 @@ inputs:
   snowflake-warehouse:
     description: The Snowflake warehouse
     required: true
+  archive-scripts:
+    description: Whether to archive the scripts
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -149,6 +153,7 @@ runs:
 
     - name: Archive Permission Details
       uses: actions/upload-artifact@v3
+      if: inputs.archive-scripts
       with:
           name: permissions
           path: |

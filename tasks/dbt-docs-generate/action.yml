@@ -28,6 +28,10 @@ inputs:
   snowflake-target-database:
     description: The snowflake target database to use
     required: true
+  archive-docs:
+    description: Enable Docs Archive
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -47,6 +51,7 @@ runs:
 
     - name: Archive Dbt Docs
       uses: actions/upload-artifact@v3
+      if: inputs.archive-docs
       with:
           name: dbt-docs
           path: |
