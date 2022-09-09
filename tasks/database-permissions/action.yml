@@ -25,10 +25,10 @@ inputs:
   snowflake-warehouse:
     description: The Snowflake warehouse
     required: true
-  archive-scripts:
+  archive-outputs:
     description: Whether to archive the scripts
     required: false
-    default: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -153,7 +153,7 @@ runs:
 
     - name: Archive Permission Details
       uses: actions/upload-artifact@v3
-      if: inputs.archive-scripts
+      if: ${{ inputs.archive-outputs == 'true' }}
       with:
           name: permissions
           path: |
@@ -161,7 +161,7 @@ runs:
             ${{ inputs.working-directory }}/schemaresults.json
 
     - name: Execute SQL against Snowflake
-      shell: bash    
+      shell: bash
       run: |
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \

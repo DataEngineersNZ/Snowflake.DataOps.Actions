@@ -28,10 +28,10 @@ inputs:
   snowflake-target-database:
     required: true
     description: The snowflake target database to use
-  archive-test-results:
+  archive-outputs:
     description: Whether to archive test results
     required: false
-    default: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -66,7 +66,7 @@ runs:
 
     - name: Archive Dbt Test Results
       uses: actions/upload-artifact@v3
-      if: inputs.archive-test-results
+      if: ${{ inputs.archive-outputs == 'true' }}
       with:
           name: dbt-test-results
           path: 
