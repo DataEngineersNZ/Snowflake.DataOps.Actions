@@ -45,7 +45,7 @@ runs:
         if (Test-Path -Path providers.tf) {
           Remove-Item -Path providers.tf
         }
-        Rename-Item -Path providers.tf.template -NewName providers.tf --FORCE
+        Rename-Item -Path providers.tf.template -NewName providers.tf
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
