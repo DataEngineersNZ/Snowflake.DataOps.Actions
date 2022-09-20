@@ -61,10 +61,12 @@ runs:
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'pull_request'
-      run: terraform plan -var="database_name=${{ inputs.target-database }}" -no-color
+      run: terraform plan -no-color
       shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.working-directory }}
+      with:
+        TF_VAR_database_name: ${{ inputs.target-database }}
 
     - name: Terraform Plan Status
       if:  steps.plan.outcome == 'failure'
@@ -72,11 +74,15 @@ runs:
       run: exit 1
 
     - name: Terraform Apply
-      run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      run: terraform apply-auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
+      with:
+        TF_VAR_database_name: ${{ inputs.target-database }}
 
     - name: Terraform Apply
-      run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      run: terraform apply -auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
+      with:
+        TF_VAR_database_name: ${{ inputs.target-database }}
