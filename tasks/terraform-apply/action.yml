@@ -65,7 +65,7 @@ runs:
       shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.working-directory }}
-      with:
+      env:
         TF_VAR_database_name: ${{ inputs.target-database }}
 
     - name: Terraform Plan Status
@@ -77,12 +77,12 @@ runs:
       run: terraform apply-auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
-      with:
+      env:
         TF_VAR_database_name: ${{ inputs.target-database }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
-      with:
+      env:
         TF_VAR_database_name: ${{ inputs.target-database }}
