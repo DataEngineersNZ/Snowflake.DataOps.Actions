@@ -1,0 +1,77 @@
+name: Run Terraform
+description: Runs a given terraform project passing in the database name to run as
+inputs:
+  working-directory:
+    description: The directory where the terrorm project is located
+    required: true
+  target-database:
+    description: The target database name to apply permissions to
+    required: true
+  snowflake-account:
+    description: The Snowflake account name
+    required: true
+  snowflake-account:
+    description: The Snowflake account region name
+    required: true
+  snowflake-username:
+    description: The Snowflake username
+    required: true
+  snowflake-password:
+    description: The Snowflake password
+    required: true
+  snowflake-role:
+    description: The Snowflake role
+    required: true
+  snowflake-warehouse:
+    description: The Snowflake warehouse
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Find and replace the placeholders in providers.tf.template
+      run: |
+        sed -i 's/<<snowflake_username>>/${{ inputs.snowflake-username }}/g' providers.tf.template
+        sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account }}/g' providers.tf.template
+        sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-region }}/g' providers.tf.template
+        sed -i 's/<<authenticator_value>>/${{ inputs.authenticator-value }}/g' providers.tf.template
+        sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
+        sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
+      shell: pwsh
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Replace providers file
+      run: |
+        if (Test-Path -Path providers.tf) {
+          Remove-Item -Path providers.tf
+        }
+        Rename-Item -Path providers.tf.template -NewName providers.tf --FORCE
+      shell: pwsh
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Plan
+      id: plan
+      if: github.event_name == 'pull_request'
+      run: terraform plan -no-color
+      continue-on-error: true
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Plan Status
+      if:  steps.plan.outcome == 'failure'
+      run: exit 1
+
+    - name: Terraform Apply
+      run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Apply
+      run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      working-directory: ${{ inputs.working-directory }}
