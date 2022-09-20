@@ -55,12 +55,14 @@ runs:
     - name: Terraform Init
       id: init
       run: terraform init
+      shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'pull_request'
       run: terraform plan -no-color
+      shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.working-directory }}
 
@@ -70,8 +72,10 @@ runs:
 
     - name: Terraform Apply
       run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
     - name: Terraform Apply
       run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      shell: pwsh
       working-directory: ${{ inputs.working-directory }}
