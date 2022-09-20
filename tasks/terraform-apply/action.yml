@@ -40,12 +40,24 @@ runs:
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
+
+    - name: Find and replace the placeholders in variables.auto.tfvars.template
+      run: |
+        sed -i 's/<<database_name>>/${{ inputs.target-database }}/g' variables.auto.tfvars.template
+      shell: pwsh
+      working-directory: ${{ inputs.working-directory }}
+
     - name: Replace providers file
       run: |
         if (Test-Path -Path providers.tf) {
           Remove-Item -Path providers.tf
         }
         Rename-Item -Path providers.tf.template -NewName providers.tf
+
+        if (Test-Path -Path variables.auto.tfvars) {
+          Remove-Item -Path variables.auto.tfvars
+        }
+        Rename-Item -Path variables.auto.tfvars.template -NewName variables.auto.tfvars
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
@@ -58,6 +70,14 @@ runs:
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
+    - name: Archive Providers File
+      uses: actions/upload-artifact@v3
+      with:
+          name: terraform-providers
+          path: |
+            ${{ inputs.working-directory }}/providers.tf
+            ${{ inputs.working-directory }}/variables.auto.tfvars
+
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'pull_request'
@@ -65,8 +85,6 @@ runs:
       shell: pwsh
       continue-on-error: true
       working-directory: ${{ inputs.working-directory }}
-      env:
-        TF_VAR_database_name: ${{ inputs.target-database }}
 
     - name: Terraform Plan Status
       if:  steps.plan.outcome == 'failure'
@@ -77,12 +95,8 @@ runs:
       run: terraform apply -auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
-      env:
-        TF_VAR_database_name: ${{ inputs.target-database }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
-      env:
-        TF_VAR_database_name: ${{ inputs.target-database }}
