@@ -68,6 +68,7 @@ runs:
 
     - name: Terraform Plan Status
       if:  steps.plan.outcome == 'failure'
+      shell: pwsh
       run: exit 1
 
     - name: Terraform Apply
