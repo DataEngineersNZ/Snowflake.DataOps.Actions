@@ -34,7 +34,7 @@ runs:
         sed -i 's/<<snowflake_username>>/${{ inputs.snowflake-username }}/g' providers.tf.template
         sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account-name }}/g' providers.tf.template
         sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-account-region }}/g' providers.tf.template
-        sed -i 's/<<authenticator_value>>/${{ inputs.authenticator-value }}/g' providers.tf.template
+        sed -i 's/<<authenticator_value>>/${{ inputs.snowflake-password }}/g' providers.tf.template
         sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
         sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
       shell: pwsh
