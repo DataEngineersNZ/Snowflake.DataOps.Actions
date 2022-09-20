@@ -72,11 +72,11 @@ runs:
       run: exit 1
 
     - name: Terraform Apply
-      run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      run: terraform apply -var='database_name=${{ inputs.target-database }}' -auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
     - name: Terraform Apply
-      run: terraform apply -var="database_name=${{ inputs.target-database }}" -auto-approve
+      run: terraform apply -var='database_name=${{ inputs.target-database }}' -auto-approve
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
