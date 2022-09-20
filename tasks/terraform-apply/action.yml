@@ -7,10 +7,10 @@ inputs:
   target-database:
     description: The target database name to apply permissions to
     required: true
-  snowflake-account:
+  snowflake-account-name:
     description: The Snowflake account name
     required: true
-  snowflake-account:
+  snowflake-account-region:
     description: The Snowflake account region name
     required: true
   snowflake-username:
@@ -32,8 +32,8 @@ runs:
     - name: Find and replace the placeholders in providers.tf.template
       run: |
         sed -i 's/<<snowflake_username>>/${{ inputs.snowflake-username }}/g' providers.tf.template
-        sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account }}/g' providers.tf.template
-        sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-region }}/g' providers.tf.template
+        sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account-name }}/g' providers.tf.template
+        sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-account-region }}/g' providers.tf.template
         sed -i 's/<<authenticator_value>>/${{ inputs.authenticator-value }}/g' providers.tf.template
         sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
         sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
