@@ -1,4 +1,4 @@
-name: Run Terraform
+name: Run Terraform Apply
 description: Runs a given terraform project passing in the database name to run as
 inputs:
   working-directory:
@@ -29,25 +29,24 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Find and replace the placeholders in providers.tf.template
+    - name: Find and replace the placeholders
       run: |
-        sed -i 's/<<snowflake_username>>/${{ inputs.snowflake-username }}/g' providers.tf.template
-        sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account-name }}/g' providers.tf.template
-        sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-account-region }}/g' providers.tf.template
-        sed -i 's/<<authenticator_value>>/${{ inputs.snowflake-password }}/g' providers.tf.template
-        sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
-        sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
+          if (Test-Path -Path providers.tf.template) {
+            sed -i 's/<<snowflake_username>>/${{ env.snowflake-username }}/g' providers.tf.template
+            sed -i 's/<<snowflake_account>>/${{ env.snowflake-account-name }}/g' providers.tf.template
+            sed -i 's/<<snowflake_region>>/${{ env.snowflake-account-region }}/g' providers.tf.template
+            sed -i 's/<<authenticator_value>>/${{ env.snowflake-password }}/g' providers.tf.template
+            sed -i 's/<<snowflake_role>>/${{ env.snowflake-role }}/g' providers.tf.template
+            sed -i 's/<<snowflake_warehouse>>/${{ env.snowflake-warehouse }}/g' providers.tf.template
+          }
+          if (Test-Path -Path variables.auto.tfvars.template) {
+            sed -i 's/<<database_name>>/${{ env.snowflake-database-prefix }}_${{ github.event.inputs.target-database }}/g' variables.auto.tfvars.template
+          }
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
 
-    - name: Find and replace the placeholders in variables.auto.tfvars.template
-      run: |
-        sed -i 's/<<database_name>>/${{ inputs.target-database }}/g' variables.auto.tfvars.template
-      shell: pwsh
-      working-directory: ${{ inputs.working-directory }}
-
-    - name: Replace providers file
+     - name:Rename Templates
       run: |
         if (Test-Path -Path providers.tf) {
           Remove-Item -Path providers.tf
@@ -66,37 +65,29 @@ runs:
 
     - name: Terraform Init
       id: init
-      run: terraform init
-      shell: pwsh
+      run: |
+        terraform init
+      shell: bash
       working-directory: ${{ inputs.working-directory }}
-
-    - name: Archive Providers File
-      uses: actions/upload-artifact@v3
-      with:
-          name: terraform-providers
-          path: |
-            ${{ inputs.working-directory }}/providers.tf
-            ${{ inputs.working-directory }}/variables.auto.tfvars
 
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'pull_request'
-      run: terraform plan -no-color
-      shell: pwsh
+      run: |
+        terraform plan -no-color
+      shell: bash
       continue-on-error: true
       working-directory: ${{ inputs.working-directory }}
 
     - name: Terraform Plan Status
       if:  steps.plan.outcome == 'failure'
-      shell: pwsh
+      shell: bash
       run: exit 1
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve
-      shell: pwsh
-      working-directory: ${{ inputs.working-directory }}
-
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
-      shell: pwsh
+      if: github.event_name != 'pull_request'
+      run: |
+        terraform apply -auto-approve
+        terraform apply -auto-approve
+      shell: bash
       working-directory: ${{ inputs.working-directory }}
