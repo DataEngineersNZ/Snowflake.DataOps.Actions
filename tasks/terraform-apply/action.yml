@@ -60,15 +60,6 @@ runs:
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Archive Files
-      uses: actions/upload-artifact@v3
-      with:
-          name: priviliages
-          path: |
-            ${{ inputs.working-directory }}/providers.tf
-            ${{ inputs.working-directory }}/variables.auto.tfvars
-
-
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
 
