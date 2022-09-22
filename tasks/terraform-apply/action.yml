@@ -46,7 +46,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
 
-     - name:Rename Templates
+    - name: Rename Templates
       run: |
         if (Test-Path -Path providers.tf) {
           Remove-Item -Path providers.tf
