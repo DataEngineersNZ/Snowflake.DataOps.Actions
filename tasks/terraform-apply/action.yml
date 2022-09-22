@@ -40,7 +40,7 @@ runs:
             sed -i 's/<<snowflake_warehouse>>/${{ env.snowflake-warehouse }}/g' providers.tf.template
           }
           if (Test-Path -Path variables.auto.tfvars.template) {
-            sed -i 's/<<database_name>>/${{ env.snowflake-database-prefix }}_${{ github.event.inputs.target-database }}/g' variables.auto.tfvars.template
+            sed -i 's/<<database_name>>/${{ env.target-database }}/g' variables.auto.tfvars.template
           }
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
