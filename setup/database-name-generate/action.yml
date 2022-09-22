@@ -18,8 +18,8 @@ runs:
         sudo apt-get update
         sudo apt-get install uuid -y
         # Set DB Name
-        DB_NAME=$(uuid | tr '-' '_').toUpper()
-        echo "::set-output name=database-name::${{ inputs.source-database-name }}_UT_$(echo $DB_NAME)"
+        DB_NAME=$(uuid | tr '-' '_')
+        echo "::set-output name=database-name::${{ inputs.source-database-name }}_UT_$(echo ${DB_NAME^^})"
 
     - name: show target name
       shell: bash
