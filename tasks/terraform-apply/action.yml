@@ -32,15 +32,15 @@ runs:
     - name: Find and replace the placeholders
       run: |
           if (Test-Path -Path providers.tf.template) {
-            sed -i 's/<<snowflake_username>>/${{ env.snowflake-username }}/g' providers.tf.template
-            sed -i 's/<<snowflake_account>>/${{ env.snowflake-account-name }}/g' providers.tf.template
-            sed -i 's/<<snowflake_region>>/${{ env.snowflake-account-region }}/g' providers.tf.template
-            sed -i 's/<<authenticator_value>>/${{ env.snowflake-password }}/g' providers.tf.template
-            sed -i 's/<<snowflake_role>>/${{ env.snowflake-role }}/g' providers.tf.template
-            sed -i 's/<<snowflake_warehouse>>/${{ env.snowflake-warehouse }}/g' providers.tf.template
+            sed -i 's/<<snowflake_username>>/${{ inputs.snowflake-username }}/g' providers.tf.template
+            sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account-name }}/g' providers.tf.template
+            sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-account-region }}/g' providers.tf.template
+            sed -i 's/<<authenticator_value>>/${{ inputs.snowflake-password }}/g' providers.tf.template
+            sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
+            sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
           }
           if (Test-Path -Path variables.auto.tfvars.template) {
-            sed -i 's/<<database_name>>/${{ env.target-database }}/g' variables.auto.tfvars.template
+            sed -i 's/<<database_name>>/${{ inputs.target-database }}/g' variables.auto.tfvars.template
           }
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
