@@ -25,6 +25,10 @@ inputs:
   snowflake-warehouse:
     description: The Snowflake warehouse
     required: true
+  import-state:
+    description: Imports existing state of existing objects
+    required: true
+    default: 'false'
 
 runs:
   using: "composite"
@@ -68,6 +72,13 @@ runs:
       run: |
         terraform init
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Create Current State File
+      id: create-state
+      if: ${{ inputs.import-state == 'true' }}
+      run: .\helpers\import_objects.ps1
+      shell: pwsh
       working-directory: ${{ inputs.working-directory }}
 
     - name: Terraform Plan
