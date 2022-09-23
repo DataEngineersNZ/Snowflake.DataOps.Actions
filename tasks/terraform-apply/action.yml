@@ -99,6 +99,12 @@ runs:
       if: github.event_name != 'pull_request'
       run: |
         terraform apply -auto-approve
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Apply (to fix state)
+      if: ${{ github.event_name != 'pull_request' && inputs.import-state == 'false' }}
+      run: |
         terraform apply -auto-approve
       shell: bash
       working-directory: ${{ inputs.working-directory }}
