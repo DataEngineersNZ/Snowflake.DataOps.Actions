@@ -1,0 +1,61 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: source_database
+    type: string
+  - name: target_database
+    type: string
+  - name: snowflake_authenticator_value
+    type: string
+  - name: database_comment
+    type: string
+  - name: archive_outputs
+    type: boolean
+    default: false
+
+steps:
+  - bash: |
+        apt-get update
+        apt-get install gettext-base -y
+        envsubst '${TARGET_DATABASE_NAME} ${SOURCE_DATABASE_NAME} ${CLONE_DATABASE_COMMENT}' < database-clone-azuredevops.sql | cat > database-clone-azuredevops-modified.sql
+    displayName: Replace template variables in sql files with environment variables
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      TARGET_DATABASE_NAME: ${{ parameters.target_database }}
+      SOURCE_DATABASE_NAME: ${{ parameters.source_database }}
+      CLONE_DATABASE_COMMENT: ${{ parameters.database_comment }}
+
+  - bash: curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.9-linux_x86_64.bash
+    displayName: Download SnowSQL
+  - bash: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
+    displayName: Install SnowSQL
+    name: install_snowsql
+
+  - bash: |
+      ~/snowflake/snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -d $SNOWSQL_DATABASE -w $SNOWSQL_WAREHOUSE -r $SNOWSQL_ROLE -f $SCRIPT_FILE
+    displayName: Run SQL Script (pwd based)
+    condition: and(succeeded(), eq(variables['snowflake-authenticator'], 'password'))
+    env:
+        SNOWSQL_ACCOUNT: $(snowflake-account)
+        SNOWSQL_USER: $(snowflake-username)
+        SNOWSQL_PWD: $(snowflake-password)
+        SNOWSQL_DATABASE: ${{ parameters.source_database }}
+        SNOWSQL_ROLE: $(snowflake-role)
+        SNOWSQL_WAREHOUSE: $(snowflake-warehouse)
+        SCRIPT_FILE: database-clone-azuredevops-modified.sql
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - bash: |
+      ~/snowflake/snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -d $SNOWSQL_DATABASE -w $SNOWSQL_WAREHOUSE -r $SNOWSQL_ROLE -f $SCRIPT_FILE --private-key-path $PRIVATE_KEY_PATH -o log_level=DEBUG 
+    displayName: Run SQL Script (key based)
+    condition: and(succeeded(), eq(variables['snowflake-authenticator'], 'private_key_path'))
+    env:
+        SNOWSQL_ACCOUNT: $(snowflake-account)
+        SNOWSQL_USER: $(snowflake-username)
+        SNOWSQL_DATABASE: ${{ parameters.target_database }}
+        SNOWSQL_ROLE: $(snowflake-role)
+        SNOWSQL_WAREHOUSE: $(snowflake-warehouse)
+        PRIVATE_KEY_PATH: ${{ parameters.snowflake_authenticator_value }}
+        SNOWSQL_PRIVATE_KEY_PASSPHRASE: $(snowflake-private-key-password)
+        SCRIPT_FILE: database-clone-azuredevops-modified.sql
+    workingDirectory: ${{ parameters.working_directory }}

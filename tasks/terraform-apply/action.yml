@@ -25,6 +25,9 @@ inputs:
   snowflake-warehouse:
     description: The Snowflake warehouse
     required: true
+  snowflake-authenticator:
+    description: The Snowflake Auth Type.
+    default: password
   import-state:
     description: Imports existing state of existing objects
     required: true
@@ -39,6 +42,7 @@ runs:
             sed -i 's/<<snowflake_username>>/${{ inputs.snowflake-username }}/g' providers.tf.template
             sed -i 's/<<snowflake_account>>/${{ inputs.snowflake-account-name }}/g' providers.tf.template
             sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-account-region }}/g' providers.tf.template
+            sed -i 's/<<authenticator_type>>/${{ inputs.snowflake_authenticator }}/g' providers.tf.template
             sed -i 's/<<authenticator_value>>/${{ inputs.snowflake-password }}/g' providers.tf.template
             sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
             sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template

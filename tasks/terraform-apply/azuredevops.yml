@@ -1,0 +1,72 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: target_database
+    type: string
+  - name: snowflake_authenticator_value
+    type: string
+    default: password
+  - name: import_state
+    type: boolean
+    default: false
+
+steps:
+
+  - bash: |
+        apt-get update
+        apt-get install gettext-base -y
+        envsubst '${snowflake_username} ${snowflake_account} ${snowflake_region} ${authenticator_type} ${authenticator_value} ${snowflake_role} ${snowflake_warehouse} ${snowflake_private_key_password}' < providers.tf.devops.template | cat > providers.tf
+        envsubst '${database_name}' < variables.auto.tfvars.devops.template | cat > variables.auto.tfvars
+    workingDirectory: ${{ parameters.working_directory }}
+    displayName: Find and replace the placeholders (bash)
+    env:
+      snowflake_username: $(snowflake-username)
+      snowflake_account: $(snowflake-account-name)
+      snowflake_region: $(snowflake-account-region)
+      authenticator_type: $(snowflake-authenticator)
+      authenticator_value: ${{ parameters.snowflake_authenticator_value }}
+      snowflake_role: $(snowflake-role)
+      snowflake_warehouse:  $(snowflake-warehouse)
+      database_name: ${{ parameters.target_database }} 
+      snowflake_private_key_password: $(snowflake-private-key-password)
+
+
+
+  - bash: curl -O https://releases.hashicorp.com/terraform/1.3.3/terraform_1.3.3_linux_amd64.zip
+    displayName: Download Terraform
+
+  - task: ExtractFiles@1
+    inputs:
+        archiveFilePatterns: '**/terraform_1.3.3_linux_amd64.zip'
+        destinationFolder:  ${{ parameters.working_directory }}
+        cleanDestinationFolder: false
+        overwriteExistingFiles: true
+
+  - bash: terraform init
+    displayName: terraform init
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - powershell: .\helpers\import_objects.ps1
+    condition: and(succeeded(), eq(${{ parameters.import_state }}, true))
+    displayName: create terraform state
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - bash: terraform plan -no-color
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    displayName: terraform plan
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - bash: terraform plan -no-color
+    condition: failed()
+    displayName: terraform plan status
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - bash: terraform apply -auto-approve
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    displayName: terraform apply
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - bash: terraform apply -auto-approve
+    condition: and(succeeded(), eq(${{ parameters.import_state }}, false), ne(variables['Build.Reason'], 'PullRequest'))
+    displayName: terraform apply to enforce permissions
+    workingDirectory: ${{ parameters.working_directory }}

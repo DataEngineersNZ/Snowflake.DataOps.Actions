@@ -36,7 +36,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Generate DBT docs without Unit-tets
+    - name: Generate DBT docs without Unit-tests
       shell: bash
       run: |
         dbt docs generate --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
