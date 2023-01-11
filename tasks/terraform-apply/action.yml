@@ -54,10 +54,7 @@ runs:
               ) | Set-Content -Path $providers_file
 
               if ('${{ inputs.snowflake-authenticator }}' -eq 'password') {
-                ((Get-Content -path $providers_file -Raw) `
-                  -replace '<<private_key_passphrase>>', '' `
-                  -replace 'private_key_passphrase =', '' `
-                ) | Set-Content -Path $providers_file
+                Get-Content $providers_file | Where-Object {$_ -notmatch 'private_key_passphrase'} | Set-Content $providers_file
               } else {
                 ((Get-Content -path $providers_file -Raw) `
                   -replace '<<private_key_passphrase>>', '${{ inputs.snowflake-privatekey-passphrase }}' `
