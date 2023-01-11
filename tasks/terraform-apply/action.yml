@@ -50,7 +50,7 @@ runs:
                   -replace '<<authenticator_type>>', '${{ inputs.snowflake-authenticator }}' `
                   -replace '<<authenticator_value>>', '${{ inputs.snowflake-authenticator-value }}' `
                   -replace '<<snowflake_role>>', '${{ inputs.snowflake-role }}' `
-                  -replace '<snowflake_warehouse>>', '${{ inputs.snowflake-warehouse }}' `
+                  -replace '<<snowflake_warehouse>>', '${{ inputs.snowflake-warehouse }}' `
               ) | Set-Content -Path $providers_file
 
               if ('${{ inputs.snowflake-authenticator }}' -eq 'password') {
