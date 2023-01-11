@@ -50,7 +50,7 @@ runs:
             
             sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
             sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
-            if (${{ inputs.snowflake-authenticator }} -eq 'password') {
+            if ('${{ inputs.snowflake-authenticator }}' -eq 'password') {
               sed -i 's/private_key_passphrase = "<<private_key_passphrase>>"/ /g' providers.tf.template
             } else {
               sed -i 's/<<private_key_passphrase>>/${{ inputs.snowflake-privatekey-passphrase }}/g' providers.tf.template
