@@ -1,0 +1,16 @@
+
+parameters:
+  - name: working-directory
+    type: string
+    default: $(System.DefaultWorkingDirectory)/schemachange
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: 'Install Python'
+    inputs:
+      versionSpec: '3.8'
+
+ - bash: |
+      pip install -r requirements.txt
+    displayName: install components
+    workingDirectory: ${{ parameters.working-directory }}

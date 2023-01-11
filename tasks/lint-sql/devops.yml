@@ -1,0 +1,43 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: linting_directory
+    type: string
+  - name: snowflake_target_database
+    type: string
+  - name: snowflake_authenticator_value
+    type: string
+  - name: env_name
+    type: string
+    default: dbt-env
+
+steps:
+
+  - bash: |
+      if ! [[ -f ".sqlfluff.json" ]]
+      then
+        envsubst < .sqlfluffconfig | cat > .sqlfluff
+      fi
+    failOnStderr: true
+    displayName: setup sql fluff
+    workingDirectory: ${{ parameters.working_directory }}
+
+  - bash: |
+        echo "linting_directory: ${{ parameters.linting_directory }}"
+        echo "working_directory: ${{ parameters.working_directory }}"
+        echo "snowflake_authenticator_value: ${{ parameters.snowflake_authenticator_value }}"
+
+        source $ENV_NAME/bin/activate
+        sqlfluff lint ${{ parameters.linting_directory }}
+    failOnStderr: true
+    displayName: Checking SQL Standards
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      ENV_NAME: ${{ parameters.env_name }}
+      snowflake-target-database: ${{ parameters.snowflake_target_database }}
+      snowflake-username: $(snowflake-username)
+      snowflake-account: $(snowflake-account)
+      snowflake-password: ${{ parameters.snowflake_authenticator_value }}
+      snowflake-warehouse: $(snowflake-warehouse)
+      snowflake-role: $(snowflake-role)
+      snowflake-private-key-password: $(snowflake-private-key-password)

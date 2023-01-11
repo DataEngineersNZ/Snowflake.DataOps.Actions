@@ -1,0 +1,76 @@
+parameters:
+  - name: target
+    type: string
+  - name: working_directory
+    type: string
+  - name: profiles_directory
+    type: string
+  - name: snowflake_target_database
+    type: string
+  - name: snowflake_authenticator_value
+    type: string
+  - name: env_name
+    type: string
+    default: dbt-env    
+
+steps:
+
+  - powershell: |
+        if(Test-Path -Path "partial_parse.msgpack") {
+          Remove-Item -Path "partial_parse.msgpack" -Force
+        }
+        if(Test-Path -Path "graph.gpickle") {
+          Remove-Item -Path "graph.gpickle" -Force
+        }
+    displayName: Clean Target
+    workingDirectory: ${{ parameters.working_directory }}/target
+
+  - bash: |
+      source $DBT_ENV_NAME/bin/activate  
+      dbt compile --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
+      dbt seed --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}  --exclude path:seeds/unit_tests path:seeds/meta
+      if [[ -f ".\manifest.json" ]]
+      then
+          echo " ==> Previous Manifest file found, running dbt run for release"  
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
+      else
+          echo " ==> No Previous Manifest file found, running dbt run fo release"  
+          dbt run --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
+      fi
+    displayName: Run dbt without Unit-tests
+    condition: and(succeeded(), ne('${{ parameters.target }}', 'unit-test'))
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      DBT_ENV_NAME: ${{ parameters.env_name }}
+      snowflake-target-database: ${{ parameters.snowflake_target_database }}
+      snowflake-username: $(snowflake-username)
+      snowflake-account: $(snowflake-account)
+      snowflake-password: ${{ parameters.snowflake_authenticator_value }}
+      snowflake-warehouse: $(snowflake-warehouse)
+      snowflake-role: $(snowflake-role)
+      snowflake-private-key-password: $(snowflake-private-key-password)
+
+  - bash: |
+      source $DBT_ENV_NAME/bin/activate  
+      dbt compile --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
+      dbt seed --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+      if [[ -f ".\manifest.json" ]]
+      then
+          echo " ==> Previous Manifest file found, running dbt run for release"  
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+      else
+            echo " ==> No Previous Manifest file found, running dbt run fo release"  
+            dbt run --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+      fi
+    displayName: Run dbt with unit-tests
+    condition: and(succeeded(), eq('${{ parameters.target }}', 'unit-test'))
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      DBT_ENV_NAME: ${{ parameters.env_name }}
+      snowflake-target-database: ${{ parameters.snowflake_target_database }}
+      snowflake-username: $(snowflake-username)
+      snowflake-account: $(snowflake-account)
+      snowflake-password: ${{ parameters.snowflake_authenticator_value }}
+      snowflake-warehouse: $(snowflake-warehouse)
+      snowflake-role: $(snowflake-role)
+      snowflake-private-key-password: $(snowflake-private-key-password)

@@ -1,0 +1,18 @@
+parameters:
+  - name: source_database_name
+    type: string
+
+steps:
+  - bash: |
+      sudo apt-get update
+      sudo apt-get install uuid -y
+      DB_NAME=$(uuid | tr '-' '_')
+      echo "##vso[task.setvariable variable=DATABASE_NAME;isOutput=true]${source_database_name}_UT_${DB_NAME^^}"
+    env:
+      source_database_name: ${{ parameters.source_database_name }}
+    displayName: create new unit test database name
+    name: set_db_name
+
+  - bash: "echo Target Unit Test Database: $(set_db_name.DATABASE_NAME)"
+    displayName: Unit Test Database Name
+
