@@ -1,0 +1,55 @@
+name:  Snowflake Authentication
+description: Sets up the public private key for the database
+inputs:
+  snowflake-authenticator:
+    description: authentication type to be used
+    required: true
+  snowflake-authenticator-value:
+    description: The authentication value
+    required: true
+  dbt-directory:
+    description: directory where dbt project is located
+    required: true
+outputs:
+  snowflake_authenticator_value:
+    description: authenticator value
+    value: ${{ steps.determine-database-name.outputs.database-name }}
+
+runs:
+  steps:
+      - name: set_auth
+        description: set the authentication value 
+        shell: pwsh
+        run: |
+            if ('${{ inputs.snowflake-authenticator }}' -eq 'private_key_path') {
+                if (Test-Path -Path ".\keys") {
+                } else {
+                    New-Item -Path ".\" -Name "keys" -ItemType "directory"
+                }
+                $PRIVATE_KEY_FILE_LOCAL_PATH = ".\keys\rsa_key.p8"
+                if (Test-Path -Path $PRIVATE_KEY_FILE_LOCAL_PATH) {
+                } else {
+                    $file_details = [Collections.Generic.List[string]]::New()
+                    $token = "${{ inputs.snowflake-authenticator-value }}"
+                    $token_arr = $token.split("||")
+                    $file_details.Add("-----BEGIN ENCRYPTED PRIVATE KEY-----`r")
+                    foreach($line in $token_arr) {
+                        if($line -ne '') {
+                            $file_details.Add("$line" + "`r")
+                        }
+                    }
+                    $file_details.Add("-----END ENCRYPTED PRIVATE KEY-----`r")
+                    $file_details | Out-File  $PRIVATE_KEY_FILE_LOCAL_PATH -Encoding utf8
+                }
+                $PRIVATE_KEY_FILE_FULL_PATH = (Get-Item -Path $PRIVATE_KEY_FILE_LOCAL_PATH).FullName
+
+                if (Test-Path -Path "$(dbt-directory)/profiles.yml") {
+                    $correctProfile = Get-Content -Path "$(dbt-directory)/profiles.privatekey.yml"
+                    Set-Content -Path "$(dbt-directory)/profiles.yml" -Value $correctProfile
+                }
+
+                echo "::set-output name=snowflake_authenticator_value::$PRIVATE_KEY_FILE_FULL_PATH"
+            }
+            else {
+                echo "::set-output name=snowflake_authenticator_value::${{ inputs.snowflake-authenticator-value }}"
+            }

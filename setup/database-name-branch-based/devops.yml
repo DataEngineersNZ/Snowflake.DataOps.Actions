@@ -1,0 +1,22 @@
+parameters:
+  - name: database_prefix
+    type: string
+
+steps:
+  - bash: |
+      DB_VERSION=$(Build.SourceBranchName)
+      echo "##vso[task.setvariable variable=DATABASE_NAME;isOutput=true]${{ parameters.database_prefix }}_${DB_VERSION^^}"
+    displayName: determine correct database name
+    name: set_db_name
+
+  - bash: |
+      echo "##vso[task.setvariable variable=PROFILE_NAME;isOutput=true]$(Build.SourceBranchName)"
+    displayName: sets the correct profile to use
+    name: set_target_profile
+
+
+  - bash: |
+      echo "Target Database: $(set_db_name.DATABASE_NAME)"
+      echo "Target Profile: $(set_target_profile.PROFILE_NAME)"
+    displayName: Database Name & Target
+

@@ -1,0 +1,51 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: env_name
+    type: string
+    default: dbt-env
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.9' 
+      addToPath: true
+    displayName: Install Python
+
+  - task: Cache@2
+    inputs:
+      key: 'python3 | "$(Agent.MachineName)" | "dbt" | dbt/.deployrequirements'
+      restoreKeys: |
+        python3 | "$(Agent.MachineName)" | "dbt" | dbt/.deployrequirements
+        python3 | "$(Agent.MachineName)" | "dbt"
+      path: ${{ parameters.working_directory }}/${{ parameters.env_name }}
+    displayName: retrieve environment from cache
+    
+  - bash: |
+      if ! [[ -d "$DBT_ENV_NAME" ]]; then
+        apt-get update && apt-get install python3-venv
+        echo -n "Virtual env does not exist, creating... "
+        python3 -m venv $DBT_ENV_NAME
+        echo "Done"
+      fi
+      source $DBT_ENV_NAME/bin/activate
+    displayName: setup environment
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      DBT_ENV_NAME: ${{ parameters.env_name }}
+
+  - bash: |
+        source $DBT_ENV_NAME/bin/activate
+        pip install -r .deployrequirements
+    displayName: Install dbt requirements
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      DBT_ENV_NAME: ${{ parameters.env_name }}
+
+  - bash: |
+      source $DBT_ENV_NAME/bin/activate
+      dbt deps
+    displayName: Install dbt dependencies
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      DBT_ENV_NAME: ${{ parameters.env_name }}

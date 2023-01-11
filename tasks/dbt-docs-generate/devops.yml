@@ -1,0 +1,56 @@
+parameters:
+  - name: target
+    type: string
+  - name: working_directory
+    type: string
+  - name: profiles_directory
+    type: string
+  - name: snowflake_target_database
+    type: string
+  - name: snowflake_authenticator_value
+    type: string
+  - name: env_name
+    type: string
+    default: dbt-env
+  - name: archive_outputs
+    type: boolean
+    default: false
+
+steps:
+
+  - bash: |
+      source $DBT_ENV_NAME/bin/activate  
+      dbt docs generate --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test
+    displayName: Generate DBT docs without Unit-tests
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      DBT_ENV_NAME: ${{ parameters.env_name }}
+      snowflake-target-database: ${{ parameters.snowflake_target_database }}
+      snowflake-username: $(snowflake-username)
+      snowflake-account: $(snowflake-account)
+      snowflake-password: ${{ parameters.snowflake_authenticator_value }}
+      snowflake-warehouse: $(snowflake-warehouse)
+      snowflake-role: $(snowflake-role)
+      snowflake-private-key-password: $(snowflake-private-key-password)
+
+  - powershell: |
+        New-Item -Path "." -Name "dbtdocs" -ItemType "directory"
+        if(Test-Path -Path "catalog.json") {
+          Copy-Item -Path "catalog.json" -Destination ".\dbtdocs\catalog.json"
+        }
+        if(Test-Path -Path "index.html") {
+          Copy-Item -Path "index.html" -Destination ".\dbtdocs\index.html"
+        }
+        if(Test-Path -Path "manifest.json") {
+          Copy-Item -Path "manifest.json" -Destination ".\dbtdocs\manifest.json"
+        }
+    displayName: Copy dbt docs generated files
+    condition: and(succeeded(), eq(${{ parameters.archive_outputs }}, true))
+    workingDirectory: ${{ parameters.working_directory }}/target
+
+  - task: PublishPipelineArtifact@1
+    displayName: Archive dbt docs
+    condition: and(succeeded(), eq(${{ parameters.archive_outputs }}, true))
+    inputs:
+      targetPath: ${{ parameters.working_directory }}/target/dbtdocs
+      artifactName: dbt-docs
