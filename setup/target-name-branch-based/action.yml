@@ -23,7 +23,7 @@ runs:
         id: determine-branch-name
         shell: bash
         run: |
-          echo "::set-output name=target-name::$(echo ${{ env.BRANCH_NAME }})"
+          echo "target-name=$(echo ${{ env.BRANCH_NAME }})" >> $GITHUB_OUTPUT
 
       - name: show target name
         shell: bash

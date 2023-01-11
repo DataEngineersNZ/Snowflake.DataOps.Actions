@@ -19,7 +19,7 @@ runs:
         sudo apt-get install uuid -y
         # Set DB Name
         DB_NAME=$(uuid | tr '-' '_')
-        echo "::set-output name=database-name::${{ inputs.source-database-name }}_UT_$(echo ${DB_NAME^^})"
+        echo "database-name=${{ inputs.source-database-name }}_UT_$(echo ${DB_NAME^^})" >> $GITHUB_OUTPUT
 
     - name: show target name
       shell: bash
