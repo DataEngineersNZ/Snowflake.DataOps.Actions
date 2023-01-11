@@ -47,15 +47,25 @@ runs:
             sed -i 's/<<snowflake_region>>/${{ inputs.snowflake-account-region }}/g' providers.tf.template
             sed -i 's/<<authenticator_type>>/${{ inputs.snowflake-authenticator }}/g' providers.tf.template
             sed -i 's/<<authenticator_value>>/${{ inputs.snowflake-authenticator-value }}/g' providers.tf.template
-            sed -i 's/<<private_key_passphrase>>/${{ inputs.snowflake-privatekey-passphrase }}/g' providers.tf.template
+            
             sed -i 's/<<snowflake_role>>/${{ inputs.snowflake-role }}/g' providers.tf.template
             sed -i 's/<<snowflake_warehouse>>/${{ inputs.snowflake-warehouse }}/g' providers.tf.template
+            if (${{ inputs.snowflake-authenticator }} -eq 'password') {
+              sed -i 's/private_key_passphrase = "<<private_key_passphrase>>"/ /g' providers.tf.template
+            } else {
+              sed -i 's/<<private_key_passphrase>>/${{ inputs.snowflake-privatekey-passphrase }}/g' providers.tf.template
+            }
           }
+          
+          
+
           if (Test-Path -Path variables.auto.tfvars.template) {
             sed -i 's/<<database_name>>/${{ inputs.target-database }}/g' variables.auto.tfvars.template
           }
       shell: pwsh
       working-directory: ${{ inputs.working-directory }}
+
+    
 
 
     - name: Rename Templates
