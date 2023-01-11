@@ -44,24 +44,23 @@ runs:
           $providers_file = "providers.tf.template"
           if (Test-Path -Path $providers_file) {
               ((Get-Content -path $providers_file -Raw) `
-                  -replace '<<snowflake_username>>', ${{ inputs.snowflake-username }}  `
-                  -replace '<<snowflake_account>>', ${{ inputs.snowflake-account-name }} `
-                  -replace '<<snowflake_region>>', ${{ inputs.snowflake-account-region }} `
-                  -replace '<<authenticator_type>>', ${{ inputs.snowflake-authenticator }} `
-                  -replace '<<authenticator_value>>', ${{ inputs.snowflake-authenticator-value }} `
-                  -replace '<<snowflake_role>>', ${{ inputs.snowflake-role }} `
-                  -replace '<snowflake_warehouse>>', ${{ inputs.snowflake-warehouse }} `
+                  -replace '<<snowflake_username>>', '${{ inputs.snowflake-username }}'  `
+                  -replace '<<snowflake_account>>', '${{ inputs.snowflake-account-name }}' `
+                  -replace '<<snowflake_region>>', '${{ inputs.snowflake-account-region }}' `
+                  -replace '<<authenticator_type>>', '${{ inputs.snowflake-authenticator }}' `
+                  -replace '<<authenticator_value>>', '${{ inputs.snowflake-authenticator-value }}' `
+                  -replace '<<snowflake_role>>', '${{ inputs.snowflake-role }}' `
+                  -replace '<snowflake_warehouse>>', '${{ inputs.snowflake-warehouse }}' `
               ) | Set-Content -Path $providers_file
 
               if ('${{ inputs.snowflake-authenticator }}' -eq 'password') {
-                $empty = ''
                 ((Get-Content -path $providers_file -Raw) `
-                  -replace '<<private_key_passphrase>>', $empty `
-                  -replace 'private_key_passphrase =', $empty `
+                  -replace '<<private_key_passphrase>>', '' `
+                  -replace 'private_key_passphrase =', '' `
                 ) | Set-Content -Path $providers_file
               } else {
                 ((Get-Content -path $providers_file -Raw) `
-                  -replace '<<private_key_passphrase>>', ${{ inputs.snowflake-privatekey-passphrase }} `
+                  -replace '<<private_key_passphrase>>', '${{ inputs.snowflake-privatekey-passphrase }}' `
                 ) | Set-Content -Path $providers_file
               }
           }
