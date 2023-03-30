@@ -70,7 +70,7 @@ runs:
       shell: pwsh
       run: |
         dbt compile --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
-        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
+        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --full-refresh
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
           echo " ==> Previous Manifest file found, running dbt run for unit tests"
           dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
