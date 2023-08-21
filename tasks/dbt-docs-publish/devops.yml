@@ -1,0 +1,63 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: subscription_authorisation
+    type: string
+  - name: storage_account
+    type: string
+  - name: target_container
+    type: string
+  - name: target_folder
+    type: string
+  - name: source_directory
+    type: string
+  - name: resource_group
+    type: string
+
+steps:
+
+  - task: Bash@3
+    displayName: Get Manifest and Catalog Paths
+    name: update_locations
+    inputs:
+      targetType: 'inline'
+      inlineScript: |
+        echo "##vso[task.setvariable variable=MANIFEST_FILE;isOutput=true]$(echo ${{ parameters.target_folder }}/manifest.json)"
+        echo "##vso[task.setvariable variable=CATALOG_FILE;isOutput=true]$(echo ${{ parameters.target_folder }}/catalog.json)"
+
+  - powershell: |
+        sed -i 's|<<BRANCH_NAME>>|${{ parameters.target_folder }}|g' manifest.json
+        sed -i 's|manifest.json|${{ parameters.target_folder }}/manifest.json|g' index.html
+        sed -i 's|catalog.json|${{ parameters.target_folder }}/catalog.json|g' index.html
+    displayName: Find and replace the placeholders
+    workingDirectory: ${{ parameters.working_directory }}/${{ parameters.source_directory }}
+
+  - task: AzureCLI@2
+    displayName: 'Upload docs to blob storage'
+    name: upload_to_blob
+    inputs:
+      azureSubscription: '${{ parameters.subscription_authorisation }}'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        myIP=$(curl -sL http://ipinfo.io/json | jq -r '.ip')
+        echo "Adding this IP address to rules: $myIP"
+        echo "##vso[task.setvariable variable=AGENT_IP;isOutput=true]$(echo $myIP | tr / -)"
+        az storage account network-rule add --resource-group ${{ parameters.resource_group }} --account-name ${{ parameters.storage_account }} --ip-address $myIP
+        az storage account show -n ${{ parameters.storage_account }} --query networkRuleSet
+        echo " ==> Sleep for 40 seconds to allow the firewall change to take "
+        sleep 40
+        az storage blob upload --container-name '${{ parameters.target_container }}' --name '${{ parameters.target_folder }}/manifest.json' --account-name '${{ parameters.storage_account }}' --file '${{ parameters.working_directory }}/${{ parameters.source_directory }}/manifest.json' --content-type 'application/json' --overwrite
+        az storage blob upload --container-name '${{ parameters.target_container }}' --name '${{ parameters.target_folder }}/catalog.json' --account-name '${{ parameters.storage_account }}' --file '${{ parameters.working_directory }}/${{ parameters.source_directory }}/catalog.json' --content-type 'application/json' --overwrite
+        az storage blob upload --container-name '${{ parameters.target_container }}' --name '${{ parameters.target_folder }}/index.html' --account-name '${{ parameters.storage_account }}' --file '${{ parameters.working_directory }}/${{ parameters.source_directory }}/index.html' --content-type 'text/html' --overwrite
+
+  - task: AzureCLI@2
+    displayName: add the IP address of the agent to the allowed list
+    condition: always()
+    inputs:
+      azureSubscription: '${{ parameters.subscription_authorisation }}'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+            echo "Remove this IP address from the rules: $(upload_to_blob.AGENT_IP)"
+            az storage account network-rule remove --resource-group ${{ parameters.resource_group }} --account-name ${{ parameters.storage_account }} --ip-address $(upload_to_blob.AGENT_IP)

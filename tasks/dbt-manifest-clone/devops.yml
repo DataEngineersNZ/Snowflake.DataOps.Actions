@@ -1,0 +1,29 @@
+parameters:
+  - name: storage_account
+    type: string
+  - name: snowflake_source_database
+    type: string
+  - name: snowflake_target_database
+    type: string
+  - name: subscription_authorisation
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Clone DBT manifest
+    inputs:
+      azureSubscription: '${{ parameters.subscription_authorisation }}'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        if $(az storage blob exists --container-name 'manifests' --name ${{ parameters.snowflake_source_database }}_manifest.json --account-name ${{ parameters.storage_account }} --query exists)
+        then
+            echo " ==> DBT manifest exists in the container, copying file"
+            az storage blob copy start \
+            --account-name ${{ parameters.storage_account }} \
+            --destination-container 'manifests' \
+            --destination-blob '${{ parameters.snowflake_target_database }}_manifest.json' \
+            --source-account-name ${{ parameters.storage_account }} \
+            --source-container 'manifests' \
+            --source-blob '${{ parameters.snowflake_source_database }}_manifest.json'
+        fi
