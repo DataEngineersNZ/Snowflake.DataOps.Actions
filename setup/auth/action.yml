@@ -16,6 +16,7 @@ outputs:
     value: ${{ steps.determine-database-name.outputs.database-name }}
 
 runs:
+  using: "composite"
   steps:
       - name: set_auth
         shell: pwsh
