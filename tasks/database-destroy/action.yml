@@ -13,8 +13,15 @@ inputs:
   snowflake-username:
     description: The Snowflake username
     required: true
-  snowflake-password:
-    description: The Snowflake password
+  snowflake-authenticator:
+    description: The Snowflake authenticator
+    required: true
+    default: "password"
+  snowflake-privatekey-passphrase:
+    description: The passphrase for the private key
+    required: false
+  snowflake-authenticator-value:
+    description: The value for the authenticator (Password or Private Key Path)
     required: true
   snowflake-role:
     description: The Snowflake role
@@ -37,8 +44,9 @@ runs:
     - name: Install SnowSQL
       shell: bash
       run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
-    - name: Execute SQL against Snowflake
-      shell: bash    
+    - name: Execute SQL against Snowflake (Password Based Authentication)
+      if: and(succeeded(), eq(${{ inputs.snowflake-authenticator }}, 'password'))
+      shell: bash
       run: |
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \
@@ -54,4 +62,23 @@ runs:
         SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
         SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
       working-directory: ${{ inputs.working-directory }}
-
+    - name: Execute SQL against Snowflake (Key Based Authentication)
+      if: and(succeeded(), eq(${{ inputs.snowflake-authenticator }}, 'private_key_path'))
+      shell: bash
+      run: |
+         ~/snowflake/snowsql \
+            -a $SNOWSQL_ACCOUNT \
+            -u $SNOWSQL_USER \
+            -w $SNOWSQL_WAREHOUSE \
+            -r $SNOWSQL_ROLE \
+            -f database-destroy.sql \
+            --private-key-path $PRIVATE_KEY_PATH
+      env:
+        SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
+        SNOWSQL_USER: ${{ inputs.snowflake-username }}
+        PRIVATE_KEY_PATH: ${{ inputs.snowflake-authenticator-value }}
+        SNOWSQL_PRIVATE_KEY_PASSPHRASE: $(inputs.snowflake-privatekey-passphrase)
+        SNOWSQL_DATABASE: ${{ inputs.target-database }}
+        SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
+      working-directory: ${{ inputs.working-directory }}

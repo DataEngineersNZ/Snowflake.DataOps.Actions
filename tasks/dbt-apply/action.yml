@@ -16,8 +16,11 @@ inputs:
   snowflake-username:
     description: The snowflake username to use
     required: true
-  snowflake-password:
-    description: The snowflake password to use
+  snowflake-privatekey-passphrase:
+    description: The passphrase for the private key
+    required: false
+  snowflake-authenticator-value:
+    description: The value for the authenticator (Password or Private Key Path)
     required: true
   snowflake-role:
     description: The snowflake role to use
@@ -63,7 +66,8 @@ runs:
         snowflake-role: ${{ inputs.snowflake-role }}
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
-        snowflake-password: ${{ inputs.snowflake-password }}
+        snowflake-password: ${{ inputs.snowflake-authenticator-value }}
+        snowflake-private-key-password: $(inputs.snowflake-privatekey-passphrase)
 
     - name: Run DBT with unit-tests
       if: inputs.target  == 'unit-test'
@@ -86,4 +90,5 @@ runs:
         snowflake-role: ${{ inputs.snowflake-role }}
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
-        snowflake-password: ${{ inputs.snowflake-password }}
+        snowflake-password: ${{ inputs.snowflake-authenticator-value }}
+        snowflake-private-key-password: $(inputs.snowflake-privatekey-passphrase)

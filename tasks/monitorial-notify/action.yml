@@ -1,0 +1,53 @@
+name: Publish Message to Monitorial.io
+description: Publish Message to Monitorial.io
+inputs:
+  webhook_url:
+    description: The webhook to send the message to
+    required: true
+  message-type:
+    description: The directory where dbt is located
+    required: true
+  severity:
+    description: The severity to use for the message
+    required: false
+    default: 'info'
+  messages:
+    description: json payload to send through
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+
+jobs:
+  send_message:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Send Message
+      uses: wei/send-message-to-webhook@v1
+      with:
+        webhook_url: ${{ secrets.WEBHOOK_URL }}
+        message: "Hello, webhook!"
+
+
+name: Send Message to Webhook
+description: Sends a message to a Monitorial.io Webhook
+inputs:
+  webhook:
+    description: Monitorial.io webhook url
+    required: true
+  severity:
+    description: The severity level of the notification
+    required: true
+  object:
+    description: 
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Send Message
+      uses: wei/send-message-to-webhook@v1
+      with:
+        webhook_url: ${{ inputs.webhook }}
+        message: "Hello, webhook!"

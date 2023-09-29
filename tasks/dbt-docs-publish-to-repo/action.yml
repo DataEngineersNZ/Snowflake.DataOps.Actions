@@ -1,0 +1,81 @@
+name: Publish Dbt Docs to Docs Repository
+description: Publish the dbt docs to Docs Repository
+inputs:
+  target-directory:
+    description: The directory where the DBT output is located
+    required: true
+  working-directory:
+    description: The directory where dbt is located
+    required: true
+  branchBasedFolder:
+    description: The sub folder to add the files to in the storage account
+    required: false
+    default: 'yes'
+  docs_repo:
+    description: The name of the repository where the docs are located
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get Manifest and Catalog Paths
+        shell: bash
+        run: |
+          echo "MANIFEST_FILE=$(echo /${{ env.BRANCH_NAME }}/manifest.json)" >> $GITHUB_ENV
+          echo "CATALOG_FILE=$(echo /${{ env.BRANCH_NAME }}/catalog.json)" >> $GITHUB_ENV
+
+      - name: Find and replace the placeholders
+        shell: pwsh
+        run: |
+          sed -i 's|<<BRANCH_NAME>>|${{ env.BRANCH_NAME }}|g' manifest.json
+          if("${{ inputs.branchBasedFolder }}" -eq "yes") {
+            sed -i 's|manifest.json|${{ env.MANIFEST_FILE }}|g' index.html
+            sed -i 's|catalog.json|${{ env.CATALOG_FILE }}|g' index.html
+          }
+        working-directory: ${{ inputs.working-directory }}/${{ inputs.target-directory }}
+
+    - name: List Branches
+      run: |
+        git fetch --all
+        git branch -r > branches.txt
+
+    - name: Push Item
+      run: |
+        # Push the item to the target repository here
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git clone ${{ inputs.docs_repo }}
+        cd target-repo
+        cd wwwroot
+        mkdir ${{ env.BRANCH_NAME }}
+        cd ${{ env.BRANCH_NAME }}
+        cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json .
+        cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json .
+        cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html .
+        git add -A
+        git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
+        cd ..
+        for folder in $(find . -type d); do
+          if [ -f "$folder/branches.txt" ]; then
+            if ! grep -q "$(basename "$folder")" "$folder/branches.txt"; then
+              echo "Deleting $folder"
+              rm -rf "$folder"
+              git rm -r directory
+              git commit -m "Delete Old branch $folder"
+            fi
+          fi
+        done
+
+        git push
