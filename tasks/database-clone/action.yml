@@ -55,6 +55,7 @@ runs:
 
     - name: Execute SQL against Snowflake (Password Based Authentication)
       if: and(succeeded(), eq(${{ inputs.snowflake-authenticator }}, 'password'))
+      shell: bash   
       run: |
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \
@@ -74,6 +75,7 @@ runs:
 
     - name: Execute SQL against Snowflake (Key Based Authentication)
       if: and(succeeded(), eq(${{ inputs.snowflake-authenticator }}, 'private_key_path'))
+      shell: bash   
       run: |
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \
