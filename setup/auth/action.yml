@@ -18,7 +18,6 @@ outputs:
 runs:
   steps:
       - name: set_auth
-        description: set the authentication value 
         shell: pwsh
         run: |
             if ('${{ inputs.snowflake-authenticator }}' -eq 'private_key_path') {
