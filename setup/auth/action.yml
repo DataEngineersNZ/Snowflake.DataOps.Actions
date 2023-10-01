@@ -48,7 +48,9 @@ runs:
                   Set-Content -Path "${{ inputs.dbt-directory }}/profiles.yml" -Value $correctProfile
               }
 
-              echo "snowflake-authenticator-value=$PRIVATE_KEY_FILE_FULL_PATH" >> $GITHUB_OUTPUT
+              echo "snowflake-authenticator-value=$(echo $PRIVATE_KEY_FILE_FULL_PATH)" >> $GITHUB_OUTPUT
+              echo "Full Path: $PRIVATE_KEY_FILE_FULL_PATH"
+              echo "Local Path: $PRIVATE_KEY_FILE_LOCAL_PATH"
           }
           else {
               echo "snowflake-authenticator-value=${{ inputs.snowflake-authenticator-value }}" >> $GITHUB_OUTPUT

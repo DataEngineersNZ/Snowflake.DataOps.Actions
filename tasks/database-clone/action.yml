@@ -76,8 +76,6 @@ runs:
       if: ${{ inputs.snowflake-authenticator == 'private_key_path' }}
       shell: bash
       run: |
-        echo "Path: ${{ inputs.snowflake-authenticator-value }}"
-
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \
             -u $SNOWSQL_USER \
