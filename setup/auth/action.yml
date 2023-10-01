@@ -11,9 +11,9 @@ inputs:
     description: directory where dbt project is located
     required: true
 outputs:
-  snowflake_authenticator_value:
+  snowflake-authenticator-value:
     description: authenticator value
-    value: ${{ steps.determine-database-name.outputs.database-name }}
+    value: ${{ steps.set_auth.outputs.snowflake-authenticator-value }}
 
 runs:
   using: "composite"
@@ -48,8 +48,8 @@ runs:
                     Set-Content -Path "${{ inputs.dbt-directory }}/profiles.yml" -Value $correctProfile
                 }
 
-                echo "snowflake_authenticator_value=$PRIVATE_KEY_FILE_FULL_PATH" >> $GITHUB_OUTPUT
+                echo "snowflake-authenticator-value=$PRIVATE_KEY_FILE_FULL_PATH" >> $GITHUB_OUTPUT
             }
             else {
-                echo "snowflake_authenticator_value=${{ inputs.snowflake-authenticator-value }}" >> $GITHUB_OUTPUT
+                echo "snowflake-authenticator-value=${{ inputs.snowflake-authenticator-value }}" >> $GITHUB_OUTPUT
             }
