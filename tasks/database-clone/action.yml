@@ -19,7 +19,6 @@ inputs:
   snowflake-authenticator:
     description: The Snowflake authenticator
     required: true
-    default: "password"
   snowflake-privatekey-passphrase:
     description: The passphrase for the private key
     required: false
@@ -52,10 +51,10 @@ runs:
     - name: Install SnowSQL
       shell: bash
       run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
-    
+
     - name: Execute SQL against Snowflake (Password Based Authentication)
-      if: eq('${{ inputs.snowflake-authenticator }}', 'password')
-      shell: bash   
+      if: '${{ inputs.snowflake-authenticator == 'password' }}
+      shell: bash
       run: |
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \
@@ -74,8 +73,8 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Execute SQL against Snowflake (Key Based Authentication)
-      if: eq('${{ inputs.snowflake-authenticator }}', 'private_key_path')
-      shell: bash   
+      if: '${{ inputs.snowflake-authenticator == 'private_key_path' }}
+      shell: bash
       run: |
          ~/snowflake/snowsql \
             -a $SNOWSQL_ACCOUNT \
