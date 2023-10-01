@@ -19,6 +19,7 @@ runs:
   using: "composite"
   steps:
     - name: set_auth
+      id: set_auth
       shell: pwsh
       run: |
           if ('${{ inputs.snowflake-authenticator }}' -eq 'private_key_path') {
