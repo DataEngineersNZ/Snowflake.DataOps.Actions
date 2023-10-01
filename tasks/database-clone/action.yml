@@ -83,8 +83,7 @@ runs:
             -w $SNOWSQL_WAREHOUSE \
             -r $SNOWSQL_ROLE \
             -f database-clone.sql \
-            --private-key-path $PRIVATE_KEY_PATH \
-            -o log_level=DEBUG
+            --private-key-path $PRIVATE_KEY_PATH
       env:
         SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
         SNOWSQL_USER: ${{ inputs.snowflake-username }}
