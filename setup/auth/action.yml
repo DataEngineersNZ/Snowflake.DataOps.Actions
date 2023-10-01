@@ -43,9 +43,9 @@ runs:
                 }
                 $PRIVATE_KEY_FILE_FULL_PATH = (Get-Item -Path $PRIVATE_KEY_FILE_LOCAL_PATH).FullName
 
-                if (Test-Path -Path "$(dbt-directory)/profiles.yml") {
-                    $correctProfile = Get-Content -Path "$(dbt-directory)/profiles.privatekey.yml"
-                    Set-Content -Path "$(dbt-directory)/profiles.yml" -Value $correctProfile
+                if (Test-Path -Path "${{ inputs.dbt-directory }}/profiles.yml") {
+                    $correctProfile = Get-Content -Path "${{ inputs.dbt-directory }}/profiles.privatekey.yml"
+                    Set-Content -Path "${{ inputs.dbt-directory }}/profiles.yml" -Value $correctProfile
                 }
 
                 echo "snowflake_authenticator_value=$PRIVATE_KEY_FILE_FULL_PATH" >> $GITHUB_OUTPUT
