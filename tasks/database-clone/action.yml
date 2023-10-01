@@ -53,7 +53,7 @@ runs:
       run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
 
     - name: Execute SQL against Snowflake (Password Based Authentication)
-      if: '${{ inputs.snowflake-authenticator == 'password' }}
+      if: ${{ inputs.snowflake-authenticator == 'password' }}
       shell: bash
       run: |
          ~/snowflake/snowsql \
@@ -73,7 +73,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Execute SQL against Snowflake (Key Based Authentication)
-      if: '${{ inputs.snowflake-authenticator == 'private_key_path' }}
+      if: ${{ inputs.snowflake-authenticator == 'private_key_path' }}
       shell: bash
       run: |
          ~/snowflake/snowsql \
