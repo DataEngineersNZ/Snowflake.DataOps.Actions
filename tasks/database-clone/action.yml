@@ -83,14 +83,14 @@ runs:
             -w $SNOWSQL_WAREHOUSE \
             -r $SNOWSQL_ROLE \
             -f database-clone.sql \
-            --private-key-path $PRIVATE_KEY_PATH
+            --private-key-path $SNOWSQL_PRIVATE_KEY_PATH
       env:
         SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
         SNOWSQL_USER: ${{ inputs.snowflake-username }}
         SNOWSQL_DATABASE: ${{ inputs.source-database }}
         SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
         SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
-        PRIVATE_KEY_PATH: ${{ inputs.snowflake-authenticator-value }}
-        SNOWSQL_PRIVATE_KEY_PASSPHRASE: $(inputs.snowflake-privatekey-passphrase)
+        SNOWSQL_PRIVATE_KEY_PATH: ${{ inputs.snowflake-authenticator-value }}
+        SNOWSQL_PRIVATE_KEY_PASSPHRASE: ${{ inputs.snowflake-privatekey-passphrase }}
       working-directory: ${{ inputs.working-directory }}
 
