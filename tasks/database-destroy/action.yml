@@ -44,8 +44,9 @@ runs:
     - name: Install SnowSQL
       shell: bash
       run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
+
     - name: Execute SQL against Snowflake (Password Based Authentication)
-      if: and(succeeded(), eq(${{ inputs.snowflake-authenticator }}, 'password'))
+      if: ${{ inputs.snowflake-authenticator == 'password' }}
       shell: bash
       run: |
          ~/snowflake/snowsql \
@@ -62,8 +63,9 @@ runs:
         SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
         SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
       working-directory: ${{ inputs.working-directory }}
+
     - name: Execute SQL against Snowflake (Key Based Authentication)
-      if: and(succeeded(), eq(${{ inputs.snowflake-authenticator }}, 'private_key_path'))
+      if: ${{ inputs.snowflake-authenticator == 'private_key_path' }}
       shell: bash
       run: |
          ~/snowflake/snowsql \
@@ -72,13 +74,13 @@ runs:
             -w $SNOWSQL_WAREHOUSE \
             -r $SNOWSQL_ROLE \
             -f database-destroy.sql \
-            --private-key-path $PRIVATE_KEY_PATH
+            --private-key-path $SNOWSQL_PRIVATE_KEY_PATH
       env:
         SNOWSQL_ACCOUNT: ${{ inputs.snowflake-account }}
         SNOWSQL_USER: ${{ inputs.snowflake-username }}
-        PRIVATE_KEY_PATH: ${{ inputs.snowflake-authenticator-value }}
-        SNOWSQL_PRIVATE_KEY_PASSPHRASE: $(inputs.snowflake-privatekey-passphrase)
-        SNOWSQL_DATABASE: ${{ inputs.target-database }}
-        SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        SNOWSQL_DATABASE: ${{ inputs.source-database }}
         SNOWSQL_ROLE: ${{ inputs.snowflake-role }}
+        SNOWSQL_WAREHOUSE: ${{ inputs.snowflake-warehouse }}
+        SNOWSQL_PRIVATE_KEY_PATH: ${{ inputs.snowflake-authenticator-value }}
+        SNOWSQL_PRIVATE_KEY_PASSPHRASE: ${{ inputs.snowflake-privatekey-passphrase }}
       working-directory: ${{ inputs.working-directory }}
