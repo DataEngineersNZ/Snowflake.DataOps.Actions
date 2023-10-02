@@ -36,7 +36,7 @@ runs:
                   $file_details.Add("-----BEGIN ENCRYPTED PRIVATE KEY-----`r")
                   foreach($line in $token_arr) {
                       if($line -ne '') {
-                          $file_details.Add("$line" + "`r")
+                          $file_details.Add("$line" + "`r")x
                       }
                   }
                   $file_details.Add("-----END ENCRYPTED PRIVATE KEY-----`r")

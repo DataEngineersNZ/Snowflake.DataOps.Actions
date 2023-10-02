@@ -7,6 +7,27 @@ inputs:
   linting-directory:
     description: The directory where the linting should occue
     required: true
+  snowflake-account:
+    description: The snowflake account to use
+    required: true
+  snowflake-username:
+    description: The snowflake username to use
+    required: true
+  snowflake-privatekey-passphrase:
+    description: The passphrase for the private key
+    required: false
+  snowflake-authenticator-value:
+    description: The value for the authenticator (Password or Private Key Path)
+    required: true
+  snowflake-role:
+    description: The snowflake role to use
+    required: true
+  snowflake-warehouse:
+    description: The snowflake warehouse to use
+    required: true
+  snowflake-target-database:
+    description: The snowflake target database to use
+    required: true
 
 runs:
   using: "composite"
@@ -24,3 +45,11 @@ runs:
       run: |
         sqlfluff lint ${{ inputs.linting-directory }}
       working-directory: ${{ inputs.working-directory }}
+      env:
+        snowflake-account: ${{ inputs.snowflake-account }}
+        snowflake-username: ${{ inputs.snowflake-username }}
+        snowflake-role: ${{ inputs.snowflake-role }}
+        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
+        snowflake-target-database: ${{ inputs.snowflake-target-database }}
+        snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
+        snowflake-private-key-password: ${{ inputs.snowflake-privatekey-passphrase }}
