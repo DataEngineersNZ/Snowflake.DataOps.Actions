@@ -90,5 +90,5 @@ runs:
         snowflake-role: ${{ inputs.snowflake-role }}
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
-        snowflake-password: ${{ inputs.snowflake-authenticator-value }}
+        snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
         snowflake-private-key-password: ${{ inputs.snowflake-privatekey-passphrase }}
