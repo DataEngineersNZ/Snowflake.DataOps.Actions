@@ -13,7 +13,7 @@ inputs:
 outputs:
   snowflake-authenticator-value:
     description: authenticator value
-    value: ${{ steps.set_auth.outputs.snowflake-authenticator-value }}
+    value: ${{ steps.set_auth.outputs.result-value }}
 
 runs:
   using: "composite"
