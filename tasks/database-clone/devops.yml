@@ -56,6 +56,6 @@ steps:
         SNOWSQL_ROLE: $(snowflake-role)
         SNOWSQL_WAREHOUSE: $(snowflake-warehouse)
         PRIVATE_KEY_PATH: ${{ parameters.snowflake_authenticator_value }}
-        SNOWSQL_PRIVATE_KEY_PASSPHRASE: $(snowflake-private-key-password)
+        SNOWSQL_PRIVATE_KEY_PASSPHRASE: $(snowflake-private-key-passphrase)
         SCRIPT_FILE: database-clone-azuredevops-modified.sql
     workingDirectory: ${{ parameters.working_directory }}

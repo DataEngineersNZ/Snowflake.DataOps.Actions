@@ -48,7 +48,7 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-private-key-password: $(snowflake-private-key-password)
+      snowflake-private-key-passphrase: $(snowflake-private-key-passphrase)
 
   - bash: |
       source $DBT_ENV_NAME/bin/activate  
@@ -73,4 +73,4 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-private-key-password: $(snowflake-private-key-password)
+      snowflake-private-key-passphrase: $(snowflake-private-key-passphrase)

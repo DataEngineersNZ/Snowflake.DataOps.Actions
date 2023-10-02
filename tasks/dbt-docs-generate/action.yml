@@ -51,7 +51,7 @@ runs:
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
         snowflake-password: ${{ inputs.snowflake-authenticator-value }}
-        snowflake-private-key-password: ${{ inputs.snowflake-privatekey-passphrase }}
+        snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: Archive Dbt Docs
       uses: actions/upload-artifact@v3

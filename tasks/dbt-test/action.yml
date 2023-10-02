@@ -52,7 +52,7 @@ runs:
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
         snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
-        snowflake-private-key-password: ${{ inputs.snowflake-privatekey-passphrase }}
+        snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: Run DBT Schema Tests and unit-tests
       if: inputs.target  == 'unit-test'
@@ -67,7 +67,7 @@ runs:
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
         snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
-        snowflake-private-key-password: ${{ inputs.snowflake-privatekey-passphrase }}
+        snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: Archive Dbt Test Results
       uses: actions/upload-artifact@v3
