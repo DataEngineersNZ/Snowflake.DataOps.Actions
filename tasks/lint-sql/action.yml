@@ -45,11 +45,3 @@ runs:
       run: |
         sqlfluff lint ${{ inputs.linting-directory }}
       working-directory: ${{ inputs.working-directory }}
-      env:
-        snowflake-account: ${{ inputs.snowflake-account }}
-        snowflake-username: ${{ inputs.snowflake-username }}
-        snowflake-role: ${{ inputs.snowflake-role }}
-        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
-        snowflake-target-database: ${{ inputs.snowflake-target-database }}
-        snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
-        snowflake-private-key-password: ${{ inputs.snowflake-privatekey-passphrase }}
