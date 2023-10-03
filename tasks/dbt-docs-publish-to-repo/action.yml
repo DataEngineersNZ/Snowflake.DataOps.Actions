@@ -61,6 +61,14 @@ runs:
           repository: ${{ github.repository_owner }}/${{ inputs.docs_repo }}
           token: ${{ inputs.docs_repo_pat }}
 
+      - name: List Files and Folders
+        shell: bash
+        run: ls -R
+
+      - name: List Files and Folders
+        shell: bash
+        run: ls -R ../${{ inputs.docs_repo }}
+
       - name: Push Item
         shell: bash
         run: |
@@ -71,9 +79,9 @@ runs:
           cd wwwroot
           mkdir ${{ env.BRANCH_NAME }}
           cd ${{ env.BRANCH_NAME }}
-          cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json .
-          cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json .
-          cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html .
+          cp ../${{ github.repository }}/${{ inputs.target-directory }}/manifest.json .
+          cp ../${{ github.repository }}/${{ inputs.target-directory }}/catalog.json .
+          cp ../${{ github.repository }}/${{ inputs.target-directory }}/index.html .
           git add -A
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
