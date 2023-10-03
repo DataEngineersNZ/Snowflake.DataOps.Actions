@@ -14,8 +14,11 @@ inputs:
   docs_repo:
     description: The name of the repository where the docs are located
     required: false
+  docs_repo_folder:
+    description: The folder where the files are located
+    required: false
   docs_repo_pat:
-    description: The name of the repository where the docs are located
+    description: The PAT to access the repository
     required: false
 
 runs:
@@ -65,23 +68,19 @@ runs:
         shell: bash
         run: ls -R
 
-      - name: List Files and Folders
-        shell: bash
-        run: ls -R ../${{ inputs.docs_repo }}
-
       - name: Push Item
         shell: bash
         run: |
           # Push the item to the target repository here
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          cd ${{ inputs.docs_repo }}
+          cd ./${{ env.docs_repo_folder }}
           cd wwwroot
           mkdir ${{ env.BRANCH_NAME }}
           cd ${{ env.BRANCH_NAME }}
-          cp ../${{ github.repository }}/${{ inputs.target-directory }}/manifest.json .
-          cp ../${{ github.repository }}/${{ inputs.target-directory }}/catalog.json .
-          cp ../${{ github.repository }}/${{ inputs.target-directory }}/index.html .
+          cp ../manifest.json .
+          cp ../catalog.json .
+          cp ../index.html .
           git add -A
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
