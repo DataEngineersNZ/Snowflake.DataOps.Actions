@@ -91,16 +91,16 @@ runs:
           git add -A
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
-          find . -type d | while read folder; do
+          for folder in ./*/; do
             if grep -q $folder $branches_file_path; then
               echo "Keeping $folder"
-            elif [ "$folder" =~ "./css" ]; then
+            elif [ "$folder" == "./css/" ]; then
               echo "Keeping $folder"
-            elif [ "$folder" =~ "./images" ]; then
+            elif [ "$folder" == "./images/" ]; then
               echo "Keeping $folder"
-            elif [ "$folder" =~ "./js" ]; then
+            elif [ "$folder" == "./js/" ]; then
               echo "Keeping $folder"
-            elif [ "$folder" =~ "./lib" ]; then
+            elif [ "$folder" == "./lib/" ]; then
               echo "Keeping $folder"
             else
               echo "Deleting $folder"
@@ -109,5 +109,4 @@ runs:
               git commit -m "Delete Old branch $folder"
             fi
           done
-
           git push
