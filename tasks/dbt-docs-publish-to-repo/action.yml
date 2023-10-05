@@ -92,12 +92,17 @@ runs:
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
           find . -type d | while read folder; do
-            if grep -q "$folder" $branches_file_path; then
-                echo "Deleting $folder"
-                rm -rf "$folder"
-                git rm -r directory
-                git commit -m "Delete Old branch $folder"
+            if grep -q $folder $branches_file_path; then
+              echo "Keeping $folder"
+            else
+              echo "Deleting $folder"
+              rm -rf $folder
+              git rm -r $folder
+              git commit -m "Delete Old branch $folder"
             fi
           done
 
           git push
+
+
+  find /c/git/DataEngineersNZ/dbt template/Snowflake.DataOps.Actions -type d
