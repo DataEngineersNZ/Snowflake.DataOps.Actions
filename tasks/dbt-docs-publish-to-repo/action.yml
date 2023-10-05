@@ -65,12 +65,6 @@ runs:
           token: ${{ inputs.docs_repo_pat }}
           path: docsrepo
 
-      - name: List Files and Folders
-        shell: bash
-        run: |
-          # List Files and Folders
-          ls -R
-
       - name: Push Item
         shell: bash
         run: |
