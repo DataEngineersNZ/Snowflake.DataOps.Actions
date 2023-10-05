@@ -75,6 +75,7 @@ runs:
           manifest_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json"
           catalog_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json"
           index_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html"
+          branches_file_path="../../../branches.txt"
           cd ./docsrepo/${{ inputs.docs_repo_folder }}
           cd ./wwwroot
           if test -d ${{ env.BRANCH_NAME }}; then
@@ -90,14 +91,12 @@ runs:
           git add -A
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
-          for folder in $(find . -type d); do
-            if [ -f "$folder/branches.txt" ]; then
-              if ! grep -q "$(basename "$folder")" "$folder/branches.txt"; then
+          find . -type d | while read folder; do
+            if grep -q "$folder" $branches_file_path; then
                 echo "Deleting $folder"
                 rm -rf "$folder"
                 git rm -r directory
                 git commit -m "Delete Old branch $folder"
-              fi
             fi
           done
 
