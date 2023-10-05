@@ -7,12 +7,18 @@ inputs:
   working-directory:
     description: The directory where dbt is located
     required: true
-  branchBasedFolder:
+  branch_based_folder:
     description: The sub folder to add the files to in the storage account
     required: false
     default: 'yes'
   docs_repo:
     description: The name of the repository where the docs are located
+    required: false
+  docs_repo_folder:
+    description: The folder where the files are located
+    required: false
+  docs_repo_pat:
+    description: The PAT to access the repository
     required: false
 
 runs:
@@ -40,42 +46,54 @@ runs:
         shell: pwsh
         run: |
           sed -i 's|<<BRANCH_NAME>>|${{ env.BRANCH_NAME }}|g' manifest.json
-          if("${{ inputs.branchBasedFolder }}" -eq "yes") {
+          if("${{ inputs.branch_based_folder }}" -eq "yes") {
             sed -i 's|manifest.json|${{ env.MANIFEST_FILE }}|g' index.html
             sed -i 's|catalog.json|${{ env.CATALOG_FILE }}|g' index.html
           }
         working-directory: ${{ inputs.working-directory }}/${{ inputs.target-directory }}
 
-    - name: List Branches
-      run: |
-        git fetch --all
-        git branch -r > branches.txt
+      - name: List Branches
+        shell: bash
+        run: |
+          git fetch --all
+          git branch -r > branches.txt
 
-    - name: Push Item
-      run: |
-        # Push the item to the target repository here
-        git config --global user.email "actions@github.com"
-        git config --global user.name "GitHub Actions"
-        git clone ${{ inputs.docs_repo }}
-        cd target-repo
-        cd wwwroot
-        mkdir ${{ env.BRANCH_NAME }}
-        cd ${{ env.BRANCH_NAME }}
-        cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json .
-        cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json .
-        cp ${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html .
-        git add -A
-        git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
-        cd ..
-        for folder in $(find . -type d); do
-          if [ -f "$folder/branches.txt" ]; then
-            if ! grep -q "$(basename "$folder")" "$folder/branches.txt"; then
-              echo "Deleting $folder"
-              rm -rf "$folder"
-              git rm -r directory
-              git commit -m "Delete Old branch $folder"
+      - name: Clone Target Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/${{ inputs.docs_repo }}
+          token: ${{ inputs.docs_repo_pat }}
+          path: docsrepo
+
+      - name: Push Item
+        shell: bash
+        run: |
+          # Push to the target repository here
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          # Root Contents
+          manifest_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json"
+          catalog_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json"
+          index_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html"
+          cd ./docsrepo/${{ inputs.docs_repo_folder }}
+          cd ./wwwroot
+          mkdir ${{ env.BRANCH_NAME }}
+          cd ./${{ env.BRANCH_NAME }}
+          cp $manifest_file_path .
+          cp $catalog_file_path .
+          cp $index_file_path .
+          git add -A
+          git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
+          cd ..
+          for folder in $(find . -type d); do
+            if [ -f "$folder/branches.txt" ]; then
+              if ! grep -q "$(basename "$folder")" "$folder/branches.txt"; then
+                echo "Deleting $folder"
+                rm -rf "$folder"
+                git rm -r directory
+                git commit -m "Delete Old branch $folder"
+              fi
             fi
-          fi
-        done
+          done
 
-        git push
+          git push

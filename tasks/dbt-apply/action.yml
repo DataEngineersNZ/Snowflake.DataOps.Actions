@@ -67,7 +67,7 @@ runs:
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
         snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
-        snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
+        snowflake-privatekey-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: Run DBT with unit-tests
       if: inputs.target  == 'unit-test'
@@ -91,4 +91,4 @@ runs:
         snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
         snowflake-target-database: ${{ inputs.snowflake-target-database }}
         snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
-        snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
+        snowflake-privatekey-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
