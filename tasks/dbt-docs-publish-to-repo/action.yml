@@ -77,7 +77,12 @@ runs:
           index_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html"
           cd ./docsrepo/${{ inputs.docs_repo_folder }}
           cd ./wwwroot
-          mkdir ${{ env.BRANCH_NAME }}
+          if test -d ${{ env.BRANCH_NAME }}; then
+            echo "Directory ${{ env.BRANCH_NAME }} exists."
+          else
+            echo "Directory ${{ env.BRANCH_NAME }} does not exists."
+            mkdir ${{ env.BRANCH_NAME }}
+          fi
           cd ./${{ env.BRANCH_NAME }}
           cp -f $manifest_file_path .
           cp -f $catalog_file_path .
