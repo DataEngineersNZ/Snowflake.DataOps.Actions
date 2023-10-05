@@ -78,9 +78,9 @@ runs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           # Root Contents
-          manifest_file_path="../../../../manifest.json")
-          catalog_file_path=$(realpath "catalog.json")
-          index_file_path=$(realpath "index.html")
+          manifest_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json"
+          catalog_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json"
+          index_file_path="../../../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html"
           cd ./docsrepo/${{ inputs.docs_repo_folder }}
           cd ./wwwroot
           mkdir ${{ env.BRANCH_NAME }}
