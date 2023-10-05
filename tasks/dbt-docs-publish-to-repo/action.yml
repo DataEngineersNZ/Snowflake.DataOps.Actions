@@ -66,23 +66,27 @@ runs:
 
       - name: List Files and Folders
         shell: bash
-        run: ls
+        run: |
+          # List Files and Folders
+          ls -R
 
       - name: Push Item
         shell: bash
         run: |
-          # Push the item to the target repository here
+          # Push to the target repository here
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          ls
-          manifest_file_path="../../../manifest.json"
+          # Root Contents
+          ls -R
+          manifest_file_path="../../manifest.json")
           catalog_file_path=$(realpath "catalog.json")
           index_file_path=$(realpath "index.html")
           cd ./${{ inputs.docs_repo_folder }}
           cd ./wwwroot
+          # WWW Contents
+          ls -R
           mkdir ${{ env.BRANCH_NAME }}
           cd ./${{ env.BRANCH_NAME }}
-          ls
           cp $manifest_file_path .
           cp $catalog_file_path .
           cp $index_file_path .
