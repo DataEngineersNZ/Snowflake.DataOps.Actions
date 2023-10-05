@@ -79,9 +79,9 @@ runs:
           cd ./wwwroot
           mkdir ${{ env.BRANCH_NAME }}
           cd ./${{ env.BRANCH_NAME }}
-          cp $manifest_file_path .
-          cp $catalog_file_path .
-          cp $index_file_path .
+          cp -f $manifest_file_path .
+          cp -f $catalog_file_path .
+          cp -f $index_file_path .
           git add -A
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
