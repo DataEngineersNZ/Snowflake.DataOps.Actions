@@ -111,6 +111,3 @@ runs:
           done
 
           git push
-
-
-  find /c/git/DataEngineersNZ/dbt template/Snowflake.DataOps.Actions -type d
