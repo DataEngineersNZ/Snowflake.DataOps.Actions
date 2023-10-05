@@ -92,6 +92,7 @@ runs:
           git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
           cd ..
           for folder in ./*/; do
+            echo "checking folder $folder in file $branches_file_path"
             if grep -q $folder $branches_file_path; then
               echo "Keeping $folder"
             elif [ "$folder" == "./css/" ]; then
@@ -102,6 +103,8 @@ runs:
               echo "Keeping $folder"
             elif [ "$folder" == "./lib/" ]; then
               echo "Keeping $folder"
+            elif [ "$folder" == "./${{ env.BRANCH_NAME }}/" ; then
+              echo "Keeping current branch $folder"
             else
               echo "Deleting $folder"
               rm -rf $folder
