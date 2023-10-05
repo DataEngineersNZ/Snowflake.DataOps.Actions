@@ -93,7 +93,7 @@ runs:
           cd ..
           for folder in ./*/; do
             echo "checking folder $folder in file $branches_file_path"
-            if grep -q $folder $branches_file_path; then
+            if grep -q "${folder::-1}" $branches_file_path; then
               echo "Keeping $folder"
             elif [ "$folder" == "./css/" ]; then
               echo "Keeping $folder"
