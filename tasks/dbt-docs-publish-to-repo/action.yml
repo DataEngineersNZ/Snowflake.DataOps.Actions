@@ -94,6 +94,14 @@ runs:
           find . -type d | while read folder; do
             if grep -q $folder $branches_file_path; then
               echo "Keeping $folder"
+            elif [ "$folder" == "css" ]; then
+              echo "Keeping $folder"
+            elif [ "$folder" == "images" ]; then
+              echo "Keeping $folder"
+            elif [ "$folder" == "js" ]; then
+              echo "Keeping $folder"
+            elif [ "$folder" == "lib" ]; then
+              echo "Keeping $folder"
             else
               echo "Deleting $folder"
               rm -rf $folder
