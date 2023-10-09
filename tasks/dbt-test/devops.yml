@@ -32,7 +32,7 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-private-key-passphrase: $(snowflake-private-key-passphrase)
+      snowflake-privatekey-passphrase: $(snowflake-privatekey-password)
 
   - bash: |
       source $DBT_ENV_NAME/bin/activate  
@@ -48,7 +48,7 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-private-key-passphrase: $(snowflake-private-key-passphrase)
+      snowflake-privatekey-passphrase: $(snowflake-privatekey-password)
 
   - task: PublishPipelineArtifact@1
     displayName: Archive dbt test results

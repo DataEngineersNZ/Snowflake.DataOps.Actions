@@ -10,13 +10,13 @@ parameters:
   - name: snowflake_target_database
     type: string
   - name: snowflake_authenticator_value
-    type: string   
+    type: string
   - name: env_name
     type: string
-    default: dbt-env    
+    default: dbt-env
 
 steps:
-      
+
   - powershell: |
         if(Test-Path -Path "partial_parse.msgpack") {
           Remove-Item -Path "partial_parse.msgpack" -Force
@@ -28,7 +28,7 @@ steps:
     workingDirectory: ${{ parameters.working_directory }}/target
 
   - bash: |
-      source $DBT_ENV_NAME/bin/activate  
+      source $DBT_ENV_NAME/bin/activate
       dbt run --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} -models tag:${{ parameters.tag }}
     displayName: Run DBT without Unit-tests
     workingDirectory: ${{ parameters.working_directory }}
@@ -40,4 +40,4 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-private-key-passphrase: $(snowflake-private-key-passphrase)
+      snowflake-privatekey-passphrase: $(snowflake-privatekey-password)

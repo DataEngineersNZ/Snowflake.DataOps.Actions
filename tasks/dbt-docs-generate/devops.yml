@@ -31,7 +31,7 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-private-key-passphrase: $(snowflake-private-key-passphrase)
+      snowflake-privatekey-passphrase: $(snowflake-privatekey-password)
 
   - powershell: |
         New-Item -Path "." -Name "dbtdocs" -ItemType "directory"

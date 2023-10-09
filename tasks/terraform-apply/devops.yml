@@ -28,7 +28,7 @@ steps:
       snowflake_role: $(snowflake-role)
       snowflake_warehouse:  $(snowflake-warehouse)
       database_name: ${{ parameters.target_database }} 
-      snowflake_private_key_password: $(snowflake-private-key-passphrase)
+      snowflake_private_key_password: $(snowflake-privatekey-password)
 
 
 
