@@ -4,9 +4,10 @@ parameters:
 
 steps:
   - bash: |
-      sudo apt-get update
-      sudo apt-get install uuid -y
-      DB_NAME=$(uuid | tr '-' '_')
+      DB_GUID=$(uuidgen)
+      echo $DB_GUID
+      DB_NAME=$(echo $DB_GUID | sed 's/-/_/g')
+      echo $DB_NAME
       echo "##vso[task.setvariable variable=DATABASE_NAME;isOutput=true]${source_database_name}_UT_${DB_NAME^^}"
     env:
       source_database_name: ${{ parameters.source_database_name }}

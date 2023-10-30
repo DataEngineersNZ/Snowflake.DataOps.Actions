@@ -19,7 +19,9 @@ parameters:
 steps:
 
   - bash: |
-      source $DBT_ENV_NAME/bin/activate  
+      echo "Snowflake Account $(snowflake-account)"
+      echo "Snowflake Username $(snowflake-username)"
+      source $DBT_ENV_NAME/bin/activate
       dbt docs generate --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test
     displayName: Generate DBT docs without Unit-tests
     workingDirectory: ${{ parameters.working_directory }}

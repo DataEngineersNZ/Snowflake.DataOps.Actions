@@ -1,0 +1,23 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: target_directory
+    type: string
+  - name: env_name
+    type: string
+    default: aws-env
+  - name: storage_account
+    default: dave-dataops
+  - name: snowflake_target_database
+
+steps:
+  - bash: |
+      source $AWS_ENV_NAME/bin/activate
+      totalFoundObjects=$(aws s3 ls s3://${{ parameters.storage_account }}/${{ parameters.snowflake_target_database }}_manifest.json --summarize | grep "Total Objects: " | sed 's/[^0-9]*//g')
+      if [ "$totalFoundObjects" -eq "1" ]; then
+        aws s3 rm s3://${{ parameters.storage_account }}/${{ parameters.snowflake_target_database }}_manifest.json
+      fi
+    displayName: Destroy dbt manifest for database
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      AWS_ENV_NAME: ${{ parameters.env_name }}

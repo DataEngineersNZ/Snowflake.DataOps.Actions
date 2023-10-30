@@ -1,0 +1,67 @@
+name:  AWS Setup
+description: Sets up the aws cli in a python virtual environment
+
+inputs:
+  working_directory:
+    description: 'The working directory for the script'
+  env_name:
+    default: aws-env
+  aws_access_key_id:
+    description: 'AWS access key id'
+  aws_secret_access_key:
+    description: 'AWS secret access key'
+  aws_region:
+    description: 'AWS region'
+    default: ap-southeast-2
+
+runs:
+  using: "composite"
+  steps:
+    - name: install Python
+      uses: "actions/setup-python@v4"
+      with:
+        python-version: '3.10'
+
+    - name: setup environment
+      shell: bash
+      run: |
+        if ! [[ -d "$AWS_ENV_NAME" ]]; then
+          apt-get update && apt-get install python3-venv
+          echo -n "Virtual env does not exist, creating... "
+          python3 -m venv $AWS_ENV_NAME
+          echo "Done"
+        fi
+        source $AWS_ENV_NAME/bin/activate
+      workingDirectory: ${{ parameters.working_directory }}
+      env:
+        AWS_ENV_NAME: ${{ inputs.env_name }}
+
+    - name: install aws cli
+      shell: bash
+      run: |
+          source $AWS_ENV_NAME/bin/activate
+          echo "Downloading AWS cli"
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          echo "Unzipping AWS cli"
+          unzip awscliv2.zip
+          echo "Installing AWS cli"
+          sudo ./aws/install
+          echo "Done"
+      workingDirectory: ${{ inputs.working_directory }}
+      env:
+        AWS_ENV_NAME: ${{ inputs.env_name }}
+
+    - name: Configuring AWS cli
+      shell: bash
+      run: |
+        source $AWS_ENV_NAME/bin/activate
+        echo "Configuring AWS cli"
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        aws configure set region $REGION
+      workingDirectory: ${{ inputs.working_directory }}
+      env:
+        AWS_ENV_NAME: ${{ inputs.env_name }}
+        AWS_ACCESS_KEY_ID: ${{ parameinputsters.aws_access_key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+        REGION: ${{ inputs.aws_region }}
