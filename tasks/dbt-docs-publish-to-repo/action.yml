@@ -90,7 +90,7 @@ runs:
           manifest_file_path="../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json"
           catalog_file_path="../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json"
           index_file_path="../../${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html"
-          branches_file_path="../../branches.txt"
+          branches_file_path="../../${{ inputs.working-directory }}/branches.txt"
           echo "Listing files in ../.."
           ls ../..
           cd ${{ inputs.docs_repo_folder }}
