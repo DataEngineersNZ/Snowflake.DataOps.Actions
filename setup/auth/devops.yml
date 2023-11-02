@@ -29,9 +29,16 @@ steps:
           if (Test-Path -Path "$(dbt-directory)/profiles.yml") {
             $correctProfile = Get-Content -Path "$(dbt-directory)/profiles.privatekey.yml"
             Set-Content -Path "$(dbt-directory)/profiles.yml" -Value $correctProfile
+          } else {
+            $correctProfile = Get-Content -Path "$(dbt-directory)/profiles.privatekey.yml"
+            $correctProfile | Out-File ${{ inputs.dbt-directory }}/profiles.yml" -Encoding utf8
           }
 
         } else {
+          if (Test-Path -Path "${{ inputs.dbt-directory }}/profiles.password.yml") {
+            $correctProfile = Get-Content -Path "${{ inputs.dbt-directory }}/profiles.password.yml"
+            $correctProfile | Out-File ${{ inputs.dbt-directory }}/profiles.yml" -Encoding utf8
+          }
           echo "##vso[task.setvariable variable=snowflake_authenticator_value;isOutput=true]$(snowflake-password)"
         }
     displayName: set authentication mechanism
