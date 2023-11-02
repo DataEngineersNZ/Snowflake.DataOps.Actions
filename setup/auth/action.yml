@@ -50,7 +50,7 @@ runs:
                   Set-Content -Path "${{ inputs.dbt-directory }}/profiles.yml" -Value $correctProfile
               } else {
                 $correctProfile = Get-Content -Path "${{ inputs.dbt-directory }}/profiles.privatekey.yml"
-                $correctProfile | Out-File ${{ inputs.dbt-directory }}/profiles.yml" -Encoding utf8
+                $correctProfile | Out-File "${{ inputs.dbt-directory }}/profiles.yml" -Encoding utf8
               }
 
               "result-value=$PRIVATE_KEY_FILE_FULL_PATH" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
@@ -58,7 +58,7 @@ runs:
           else {
               if (Test-Path -Path "${{ inputs.dbt-directory }}/profiles.password.yml") {
                   $correctProfile = Get-Content -Path "${{ inputs.dbt-directory }}/profiles.password.yml"
-                  $correctProfile | Out-File ${{ inputs.dbt-directory }}/profiles.yml" -Encoding utf8
+                  $correctProfile | Out-File "${{ inputs.dbt-directory }}/profiles.yml" -Encoding utf8
               }
               "result-value=${{ inputs.snowflake-authenticator-value }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           }
