@@ -25,6 +25,10 @@ runs:
           echo "====> listing files"
           ls
           echo "============================="
+          ls ${{ inputs.dbt-directory }}
+          echo "============================="
+          ls snowflake-dataops
+          echo "============================="
           if ('${{ inputs.snowflake-authenticator }}' -eq 'private_key_path') {
               if (Test-Path -Path ".\keys") {
               } else {
