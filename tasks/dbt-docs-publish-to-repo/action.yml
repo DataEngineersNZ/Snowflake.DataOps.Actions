@@ -50,7 +50,7 @@ runs:
         run: |
           git fetch --all
           git branch -r > branches.txt
-        working-directory: ${{ parameters.working_directory }}
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Find and replace the placeholders
         shell: pwsh
