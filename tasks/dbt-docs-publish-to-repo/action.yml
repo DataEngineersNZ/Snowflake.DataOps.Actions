@@ -50,7 +50,7 @@ runs:
         run: |
           git fetch --all
           git branch -r > branches.txt
-        workingDirectory: ${{ parameters.working_directory }}
+        working-directory: ${{ parameters.working_directory }}
 
       - name: Find and replace the placeholders
         shell: pwsh
@@ -80,7 +80,7 @@ runs:
 
       - name: Push Item
         shell: bash
-        workingDirectory: "../"
+        working-directory: "../"
         run: |
           echo "Listing files in root"
           ls
