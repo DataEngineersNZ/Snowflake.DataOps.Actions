@@ -22,6 +22,9 @@ runs:
       id: set_auth
       shell: pwsh
       run: |
+          echo "====> listing files"
+          ls
+          echo "============================="
           if ('${{ inputs.snowflake-authenticator }}' -eq 'private_key_path') {
               if (Test-Path -Path ".\keys") {
               } else {
