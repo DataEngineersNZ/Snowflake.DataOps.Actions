@@ -45,9 +45,23 @@ runs:
           echo "MANIFEST_FILE=$(echo /${{ env.BRANCH_NAME }}/manifest.json)" >> $GITHUB_ENV
           echo "CATALOG_FILE=$(echo /${{ env.BRANCH_NAME }}/catalog.json)" >> $GITHUB_ENV
 
+      - name: view directory
+        shell: bash
+        run: |
+          echo "Working Directory: ${{ inputs.working_directory }}"
+          ls
+          echo "=================================="
+          echo "DBT Directory: ${{ inputs.dbt-directory }}"
+          ls ${{ inputs.dbt-directory }}
+          echo "=================================="
+          echo "Target Directory: ${{ inputs.target-directory }}"
+          ls ${{ inputs.dbt-directory }}/${{ inputs.target-directory }}
+        working-directory: ${{ inputs.working_directory }}
+
       - name: List Branches
         shell: bash
         run: |
+          ls
           git fetch --all
           git branch -r > branches.txt
         working-directory: ${{ inputs.working_directory }}
