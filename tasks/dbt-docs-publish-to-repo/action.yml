@@ -92,6 +92,17 @@ runs:
           token: ${{ inputs.docs_repo_pat }}
           path: docsrepo
 
+      - name: view directory
+        shell: bash
+        run: |
+          echo "Working Directory: ${{ inputs.working_directory }}"
+          ls
+          echo "=================================="
+          echo "Above Directory: .."
+          ls ..
+          echo "=================================="
+        working-directory: ${{ inputs.working_directory }}
+
       - name: Push Item
         shell: bash
         working-directory: "../"
