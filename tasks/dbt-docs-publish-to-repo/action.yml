@@ -53,7 +53,7 @@ runs:
           echo "=================================="
           ls
           echo "=================================="
-          echo "Working Directory Parent
+          echo "Working Directory Parent"
           echo "=================================="
           ls ..
           echo "=================================="
