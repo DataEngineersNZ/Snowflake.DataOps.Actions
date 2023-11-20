@@ -48,10 +48,17 @@ runs:
       - name: view directory
         shell: bash
         run: |
+          echo "=================================="
           echo "Working Directory: ${{ inputs.working-directory }}"
+          echo "=================================="
           ls
           echo "=================================="
+          echo "Working Directory Parent
+          echo "=================================="
+          ls ..
+          echo "=================================="
           echo "DBT Directory: ${{ inputs.dbt-directory }}"
+          echo "=================================="
           ls ${{ inputs.dbt-directory }}
           echo "=================================="
           echo "Target Directory: ${{ inputs.target-directory }}"
@@ -61,9 +68,9 @@ runs:
       - name: List Branches
         shell: bash
         run: |
-          ls
           git fetch --all
           git branch -r > branches.txt
+          ls
         working-directory: ${{ inputs.working-directory }}
 
       - name: Find and replace the placeholders
@@ -95,10 +102,9 @@ runs:
       - name: view directory
         shell: bash
         run: |
-          echo "Working Directory: ${{ inputs.working-directory }}"
-          ls
           echo "=================================="
-          echo "Above Directory: .."
+          echo "Working Directory Parent
+          echo "=================================="
           ls ..
           echo "=================================="
         working-directory: ${{ inputs.working-directory }}
