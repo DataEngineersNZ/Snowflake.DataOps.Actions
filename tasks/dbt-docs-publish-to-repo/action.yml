@@ -103,7 +103,7 @@ runs:
         shell: bash
         run: |
           echo "=================================="
-          echo "Working Directory Parent
+          echo "Working Directory Parent"
           echo "=================================="
           ls ..
           echo "=================================="
