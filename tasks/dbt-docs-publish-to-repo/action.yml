@@ -126,16 +126,16 @@ runs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           # Configure paths relative to root
-          manifest_file_path="../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/manifest.json"
-          catalog_file_path="../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/catalog.json"
-          index_file_path="../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/index.html"
-          branches_file_path="../${{ inputs.working-directory }}/branches.txt"
-          echo "Listing files in ../${{ inputs.working-directory }}"
-          ls ../${{ inputs.working-directory }}
+          manifest_file_path="../../../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/manifest.json"
+          catalog_file_path="../../../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/catalog.json"
+          index_file_path="../../../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/index.html"
+          branches_file_path="../../../${{ inputs.working-directory }}/branches.txt"
           cd ${{ inputs.docs_repo_folder }}
-          echo "Listing files in ${{ inputs.docs_repo_folder }}"
+          echo "===> Listing files in ${{ inputs.docs_repo_folder }}"
           ls
           cd wwwroot
+          echo "===> Listing files in ../../../${{ inputs.working-directory }}"
+          ls ../../../${{ inputs.working-directory }}
           branch_name=$(grep -r "${{ inputs.target_folder }}$" "$branches_file_path")
           IFS='/' read -ra folders <<< "${branch_name:9}"
 
