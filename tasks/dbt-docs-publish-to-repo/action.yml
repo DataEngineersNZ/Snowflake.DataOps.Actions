@@ -111,12 +111,13 @@ runs:
 
       - name: Push Item
         shell: bash
-        working-directory: "../"
+        working-directory: "${{ inputs.working-directory }}/.."
         run: |
-          echo "Listing files in root"
+          echo "===> Listing Files In Root"
           ls
+          echo "===> Changing Directory to docsrepo"
           cd docsrepo
-          echo "Listing files in docsrepo"
+          echo "===> Listing files in docsrepo"
           ls
 
           # Push to the target repository here
