@@ -31,19 +31,15 @@ runs:
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+          branch_name=${GITHUB_REF##*/}
+          echo "Current branch: $branch_name"
+          echo "BRANCH_NAME=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
 
       - name: Get branch name (pull request)
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
-
-      - name: Get Manifest and Catalog Paths
-        shell: bash
-        run: |
-          echo "MANIFEST_FILE=$(echo /${{ env.BRANCH_NAME }}/manifest.json)" >> $GITHUB_ENV
-          echo "CATALOG_FILE=$(echo /${{ env.BRANCH_NAME }}/catalog.json)" >> $GITHUB_ENV
 
       - name: view directory
         shell: bash
