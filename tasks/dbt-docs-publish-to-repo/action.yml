@@ -48,7 +48,7 @@ runs:
       - name: view directory
         shell: bash
         run: |
-          echo "Working Directory: ${{ inputs.working_directory }}"
+          echo "Working Directory: ${{ inputs.working-directory }}"
           ls
           echo "=================================="
           echo "DBT Directory: ${{ inputs.dbt-directory }}"
@@ -56,7 +56,7 @@ runs:
           echo "=================================="
           echo "Target Directory: ${{ inputs.target-directory }}"
           ls ${{ inputs.dbt-directory }}/${{ inputs.target-directory }}
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.working-directory }}
 
       - name: List Branches
         shell: bash
@@ -64,7 +64,7 @@ runs:
           ls
           git fetch --all
           git branch -r > branches.txt
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.working-directory }}
 
       - name: Find and replace the placeholders
         shell: pwsh
@@ -95,13 +95,13 @@ runs:
       - name: view directory
         shell: bash
         run: |
-          echo "Working Directory: ${{ inputs.working_directory }}"
+          echo "Working Directory: ${{ inputs.working-directory }}"
           ls
           echo "=================================="
           echo "Above Directory: .."
           ls ..
           echo "=================================="
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.working-directory }}
 
       - name: Push Item
         shell: bash
