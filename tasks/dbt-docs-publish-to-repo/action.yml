@@ -78,11 +78,11 @@ runs:
         run: |
           $branch_file = "../../branches.txt"
           Write-Host "Branch File: $branch_file"
-          Write-Host "Branch Name: ${{ inputs.target_folder }}"
+          Write-Host "Branch Name: $${{ env.BRANCH_NAME }}"
           Write-Host "-----------------------------"
           Get-Content -Path $branch_file
           Write-Host "-----------------------------"
-          $branch_name = Select-String -Path $branch_file -Pattern "${{ inputs.target_folder }}$" | Select-Object -ExpandProperty Line
+          $branch_name = Select-String -Path $branch_file -Pattern "$${{ env.BRANCH_NAME }}$" | Select-Object -ExpandProperty Line
           Write-Host $branch_name
           $branch_name = $branch_name.Substring(9)
           Write-Host $branch_name
@@ -136,7 +136,7 @@ runs:
           cd wwwroot
           echo "===> Listing files in ../../../${{ inputs.working-directory }}"
           ls ../../../${{ inputs.working-directory }}
-          branch_name=$(grep -r "${{ inputs.target_folder }}$" "$branches_file_path")
+          branch_name=$(grep -r "$${{ env.BRANCH_NAME }}$" "$branches_file_path")
           IFS='/' read -ra folders <<< "${branch_name:9}"
 
           for folder in "${folders[@]}"; do
@@ -163,8 +163,8 @@ runs:
             cd ..
           done
           for folder in $(find . -type d); do
-            echo "checking folder ${folder:2:-1} in file $branches_file_path"
-            if grep -q "${folder:2:-1}" $branches_file_path; then
+            echo "checking folder ${folder:2:} in file $branches_file_path"
+            if grep -q "${folder:2:}" $branches_file_path; then
               echo "Keeping $folder"
             elif [[ "$folder" == "./css"* ]]; then
               echo "Keeping $folder"
@@ -174,7 +174,7 @@ runs:
               echo "Keeping $folder"
             elif [[ "$folder" == "./lib"* ]]; then
               echo "Keeping $folder"
-            elif [ "$folder" == "./${{ inputs.target_folder }}/" ]; then
+            elif [ "$folder" == "./$${{ env.BRANCH_NAME }}/" ]; then
               echo "Keeping current branch $folder"
             else
               echo "Deleting $folder"
