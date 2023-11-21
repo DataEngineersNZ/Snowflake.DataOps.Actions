@@ -1,0 +1,61 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: env_name
+    type: string
+    default: aws-env
+  - name: aws_access_key_id
+    type: string
+  - name: aws_secret_access_key
+    type: string
+  - name: aws_region
+    type: string
+    default: ap-southeast-2
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.10'
+      addToPath: true
+    displayName: Install Python
+
+  - bash: |
+      if ! [[ -d "$AWS_ENV_NAME" ]]; then
+        apt-get update && apt-get install python3-venv
+        echo -n "Virtual env does not exist, creating... "
+        python3 -m venv $AWS_ENV_NAME
+        echo "Done"
+      fi
+      source $AWS_ENV_NAME/bin/activate
+    displayName: setup environment
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      AWS_ENV_NAME: ${{ parameters.env_name }}
+
+  - bash: |
+        source $AWS_ENV_NAME/bin/activate
+        echo "Downloading AWS cli"
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        echo "Unzipping AWS cli"
+        unzip awscliv2.zip
+        echo "Installing AWS cli"
+        sudo ./aws/install
+        echo "Done"
+    displayName: install aws cli
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      AWS_ENV_NAME: ${{ parameters.env_name }}
+
+  - bash: |
+        source $AWS_ENV_NAME/bin/activate
+        echo "Configuring AWS cli"
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        aws configure set region $REGION
+    displayName: Configuring AWS cli
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      AWS_ENV_NAME: ${{ parameters.env_name }}
+      AWS_ACCESS_KEY_ID: ${{ parameters.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ parameters.aws_secret_access_key }}
+      REGION: ${{ parameters.aws_region }}

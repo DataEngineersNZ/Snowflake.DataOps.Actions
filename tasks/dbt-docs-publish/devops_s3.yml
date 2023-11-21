@@ -1,0 +1,22 @@
+parameters:
+  - name: working_directory
+    type: string
+  - name: env_name
+    type: string
+    default: aws-env
+  - name: storage_account
+    default: dave-dbtdocs
+  - name: target_folder
+    default: sample
+  - name: target_directory
+
+steps:
+  - bash: |
+      source $AWS_ENV_NAME/bin/activate
+      aws s3 cp ${{ parameters.target_directory }}/manifest.json s3://${{ parameters.storage_account }}/${{ parameters.target_folder }}/manifest.json
+      aws s3 cp ${{ parameters.target_directory }}/catalog.json s3://${{ parameters.storage_account }}/${{ parameters.target_folder }}/catalog.json
+      aws s3 cp ${{ parameters.target_directory }}/index.html s3://${{ parameters.storage_account }}/${{ parameters.target_folder }}/index.html
+    displayName: Upload dbt docs for database
+    workingDirectory: ${{ parameters.working_directory }}
+    env:
+      AWS_ENV_NAME: ${{ parameters.env_name }}

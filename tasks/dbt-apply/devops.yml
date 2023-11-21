@@ -11,7 +11,7 @@ parameters:
     type: string
   - name: env_name
     type: string
-    default: dbt-env    
+    default: dbt-env
 
 steps:
 
@@ -26,13 +26,12 @@ steps:
     workingDirectory: ${{ parameters.working_directory }}/target
 
   - bash: |
-      source $DBT_ENV_NAME/bin/activate  
+      source $DBT_ENV_NAME/bin/activate
       dbt compile --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
       dbt seed --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}  --exclude path:seeds/unit_tests path:seeds/meta
-      if [[ -f ".\manifest.json" ]]
-      then
+      if test -f ./manifest.json; then
           echo " ==> Previous Manifest file found, running dbt run for release"  
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
+          dbt run -s state:modified+ --defer --state . --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
       else
           echo " ==> No Previous Manifest file found, running dbt run fo release"  
           dbt run --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
@@ -54,13 +53,12 @@ steps:
       source $DBT_ENV_NAME/bin/activate  
       dbt compile --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
       dbt seed --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
-      if [[ -f ".\manifest.json" ]]
-      then
-          echo " ==> Previous Manifest file found, running dbt run for release"  
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+      if test -f ./manifest.json; then
+          echo " ==> Previous Manifest file found, running dbt run for unit-tests"  
+          dbt run -s state:modified+ --defer --state ./ --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
       else
-            echo " ==> No Previous Manifest file found, running dbt run fo release"  
-            dbt run --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+          echo " ==> No Previous Manifest file found, running dbt run for unit-tests"  
+          dbt run --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
       fi
     displayName: Run dbt with unit-tests
     condition: and(succeeded(), eq('${{ parameters.target }}', 'unit-test'))

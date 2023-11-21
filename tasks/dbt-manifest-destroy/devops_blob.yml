@@ -1,0 +1,26 @@
+parameters:
+  - name: storage_account
+    type: string
+  - name: snowflake_target_database
+    type: string
+  - name: subscription_authorisation
+    type: string
+
+steps:
+
+  - task: AzureCLI@2
+    displayName: Delete DBT manifest
+    inputs:
+      azureSubscription: '${{ parameters.subscription_authorisation }}'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+          if $(az storage blob exists --container-name 'manifests' --name ${{ parameters.snowflake_target_database }}_manifest.json --account-name ${{ parameters.storage_account }} --query exists)
+          then
+              echo " ==> DBT manifest exists in the container, deleting file"
+              az storage blob delete \
+              --account-name ${{ parameters.storage_account }} \
+              --container-name 'manifests' \
+              --name '${{ parameters.snowflake_target_database }}_manifest.json' \
+              --delete-snapshots include
+          fi
