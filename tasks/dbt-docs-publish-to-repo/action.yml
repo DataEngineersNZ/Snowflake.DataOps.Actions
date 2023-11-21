@@ -42,26 +42,6 @@ runs:
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
-      - name: view directory
-        shell: bash
-        run: |
-          echo "=================================="
-          echo "Working Directory: ${{ inputs.working-directory }}"
-          echo "=================================="
-          ls
-          echo "=================================="
-          echo "Working Directory Parent"
-          echo "=================================="
-          ls ..
-          echo "=================================="
-          echo "DBT Directory: ${{ inputs.dbt-directory }}"
-          echo "=================================="
-          ls ${{ inputs.dbt-directory }}
-          echo "=================================="
-          echo "Target Directory: ${{ inputs.target-directory }}"
-          ls ${{ inputs.dbt-directory }}/${{ inputs.target-directory }}
-        working-directory: ${{ inputs.working-directory }}
-
       - name: List Branches
         shell: bash
         run: |
@@ -96,28 +76,13 @@ runs:
           token: ${{ inputs.docs_repo_pat }}
           path: docsrepo
 
-      - name: view directory
-        shell: bash
-        run: |
-          echo "=================================="
-          echo "Working Directory Parent"
-          echo "=================================="
-          ls ..
-          echo "=================================="
-        working-directory: ${{ inputs.working-directory }}
 
       - name: Push Item
         shell: bash
         working-directory: "${{ inputs.working-directory }}/.."
         run: |
-          echo "===> Listing Files In Root"
-          ls
-          echo "===> Listing Files In snowflake-dataops"
-          ls ./snowflake-dataops
           echo "===> Changing Directory to docsrepo"
           cd docsrepo
-          echo "===> Listing files in docsrepo"
-          ls
 
           # Push to the target repository here
           git config --global user.email "actions@github.com"
@@ -128,11 +93,9 @@ runs:
           index_file_path="../../../${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}/index.html"
           branches_file_path="../../../${{ inputs.working-directory }}/branches.txt"
           cd ${{ inputs.docs_repo_folder }}
-          echo "===> Listing files in ${{ inputs.docs_repo_folder }}"
-          ls
+
           cd wwwroot
-          echo "===> Listing files in ../../../${{ inputs.working-directory }}"
-          ls ../../../${{ inputs.working-directory }}
+
           branch_name=$(grep -r "$${{ env.BRANCH_NAME }}$" "$branches_file_path")
           IFS='/' read -ra folders <<< "${branch_name:9}"
 
