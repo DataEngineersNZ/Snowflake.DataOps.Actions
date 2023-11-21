@@ -31,9 +31,9 @@ runs:
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          branch_name=${GITHUB_REF##*}
+          branch_name=$(git branch --show-current)
           echo "Current branch: $branch_name"
-          echo "BRANCH_NAME=$(echo ${GITHUB_REF##*})" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$(echo $branch_name)" >> $GITHUB_ENV
 
       - name: Get branch name (pull request)
         if: github.event_name == 'pull_request'
