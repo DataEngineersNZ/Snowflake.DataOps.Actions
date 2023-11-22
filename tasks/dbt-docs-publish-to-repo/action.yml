@@ -27,22 +27,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - name: Get branch name (merge)
+      - name: Get branch name
         if: github.event_name != 'pull_request'
+        id: get-branch-name
         shell: bash
         run: |
           branch_name=$(git branch --show-current)
           echo "Current branch: $branch_name"
-          echo "BRANCH_NAME=$(echo $branch_name)" >> $GITHUB_ENV
+          echo "branch-name=$(echo $branch_name)" >> $GITHUB_OUTPUT
         working-directory: ${{ inputs.working-directory }}
 
-      - name: Get branch name (pull request)
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
-
       - name: List Branches
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           git fetch --all
@@ -51,26 +47,21 @@ runs:
         working-directory: ${{ inputs.working-directory }}
 
       - name: Find and replace the placeholders
+        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $branch_file = "../../branches.txt"
           Write-Host "Branch File: $branch_file"
-          Write-Host "Branch Name: $${{ env.BRANCH_NAME }}"
-          Write-Host "-----------------------------"
-          Get-Content -Path $branch_file
-          Write-Host "-----------------------------"
-          $branch_name = Select-String -Path $branch_file -Pattern "$${{ env.BRANCH_NAME }}$" | Select-Object -ExpandProperty Line
-          Write-Host $branch_name
-          $branch_name = $branch_name.Substring(9)
-          Write-Host $branch_name
-          (Get-Content -Path "manifest.json") -replace "<<BRANCH_NAME>>", $branch_name | Set-Content -Path "manifest.json"
-          (Get-Content -Path "index.html") -replace "manifest.json", "/$branch_name/manifest.json" | Set-Content -Path "index.html"
-          (Get-Content -Path "index.html") -replace "catalog.json", "/$branch_name/catalog.json" | Set-Content -Path "index.html"
+          Write-Host "Branch Name: ${{ steps.get-branch-name.outputs.branch-name }}"
+          (Get-Content -Path "manifest.json") -replace "<<BRANCH_NAME>>", ${{ steps.get-branch-name.outputs.branch-name }} | Set-Content -Path "manifest.json"
+          (Get-Content -Path "index.html") -replace "manifest.json", "/${{ steps.get-branch-name.outputs.branch-name }}/manifest.json" | Set-Content -Path "index.html"
+          (Get-Content -Path "index.html") -replace "catalog.json", "/${{ steps.get-branch-name.outputs.branch-name }}/catalog.json" | Set-Content -Path "index.html"
         working-directory: ${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}
 
 
       - name: Clone Target Repository
         uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
         with:
           repository: ${{ github.repository_owner }}/${{ inputs.docs_repo }}
           token: ${{ inputs.docs_repo_pat }}
@@ -78,6 +69,7 @@ runs:
 
 
       - name: Push Item
+        if: github.event_name != 'pull_request'
         shell: bash
         working-directory: "${{ inputs.working-directory }}/.."
         run: |
@@ -96,7 +88,7 @@ runs:
 
           cd wwwroot
 
-          branch_name=$(grep -r "$${{ env.BRANCH_NAME }}$" "$branches_file_path")
+          branch_name=$(grep -r "$${{ steps.get-branch-name.outputs.branch-name }}$" "$branches_file_path")
           IFS='/' read -ra folders <<< "${branch_name:9}"
 
           for folder in "${folders[@]}"; do
@@ -118,7 +110,7 @@ runs:
           cp -f $catalog_file_path .
           cp -f $index_file_path .
           git add -A
-          git commit -m "Added dbt docs for ${{ env.BRANCH_NAME }}"
+          git commit -m "Added dbt docs for ${{ steps.get-branch-name.outputs.branch-name }}"
           for folder in "${folders[@]}"; do
             cd ..
           done
@@ -134,7 +126,7 @@ runs:
               echo "Keeping $folder"
             elif [[ "$folder" == "./lib"* ]]; then
               echo "Keeping $folder"
-            elif [ "$folder" == "./$${{ env.BRANCH_NAME }}/" ]; then
+            elif [ "$folder" == "./${{ steps.get-branch-name.outputs.branch-name }}/" ]; then
               echo "Keeping current branch $folder"
             else
               echo "Deleting $folder"
