@@ -88,8 +88,8 @@ runs:
 
           cd wwwroot
 
-          branch_name=$(grep -r "$${{ steps.get-branch-name.outputs.branch-name }}$" "$branches_file_path")
-          IFS='/' read -ra folders <<< "${branch_name:9}"
+          echo "Branch Name: ${{ steps.get-branch-name.outputs.branch-name }}"
+          IFS='/' read -ra folders <<< "${{ steps.get-branch-name.outputs.branch-name }}"
 
           for folder in "${folders[@]}"; do
             if test -d $folder; then
@@ -98,12 +98,11 @@ runs:
                 echo "Directory $folder does not exists ... creating it"
                 mkdir $folder
             fi
-            echo "current: $folder"
-            echo "target: $target_folder"
-                manifest_file_path="../$manifest_file_path"
-                catalog_file_path="../$catalog_file_path"
-                index_file_path="../$index_file_path"
             cd $folder
+            echo "current: $folder"
+            manifest_file_path="../$manifest_file_path"
+            catalog_file_path="../$catalog_file_path"
+            index_file_path="../$index_file_path"
           done
 
           cp -f $manifest_file_path .
