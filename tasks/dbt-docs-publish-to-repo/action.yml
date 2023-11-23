@@ -53,7 +53,7 @@ runs:
           $branch_file = "../../branches.txt"
           Write-Host "Branch File: $branch_file"
           Write-Host "Branch Name: ${{ steps.get-branch-name.outputs.branch-name }}"
-          (Get-Content -Path "manifest.json") -replace "<<BRANCH_NAME>>", ${{ steps.get-branch-name.outputs.branch-name }} | Set-Content -Path "manifest.json"
+          (Get-Content -Path "manifest.json") -replace "<<BRANCH_NAME>>", "${{ steps.get-branch-name.outputs.branch-name }}" | Set-Content -Path "manifest.json"
           (Get-Content -Path "index.html") -replace "manifest.json", "/${{ steps.get-branch-name.outputs.branch-name }}/manifest.json" | Set-Content -Path "index.html"
           (Get-Content -Path "index.html") -replace "catalog.json", "/${{ steps.get-branch-name.outputs.branch-name }}/catalog.json" | Set-Content -Path "index.html"
         working-directory: ${{ inputs.working-directory }}/${{ inputs.dbt-directory }}/${{ inputs.target-directory }}
