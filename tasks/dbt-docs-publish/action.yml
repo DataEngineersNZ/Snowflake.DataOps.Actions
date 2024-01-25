@@ -24,6 +24,10 @@ inputs:
     description: The sub folder to add the files to in the storage account
     required: false
     default: 'yes'
+  waitPeriod:
+    description: The number of seconds to wait before removing the IP address from the firewall
+    required: false
+    default: 30
 
 runs:
   using: "composite"
@@ -49,7 +53,7 @@ runs:
       - name: Authenticate to Azure as a Service Principal
         uses: azure/login@v1
         with:
-          creds: ${{ inputs.azure_credentials }}           
+          creds: ${{ inputs.azure_credentials }}
 
       - name: Find and replace the placeholders
         shell: pwsh
@@ -72,8 +76,8 @@ runs:
               echo "AGENT_IP=$(echo $myIP | tr / -)" >> $GITHUB_ENV
               az storage account network-rule add --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address $myIP
               az storage account show -n ${{ inputs.storage-account }} --query networkRuleSet
-              echo " ==> Sleep for 30 seconds to allow the firewall change to take "
-              sleep 30
+              echo " ==> Sleep for ${{ inputs.waitPeriod }} seconds to allow the firewall change to take "
+              sleep ${{ inputs.waitPeriod }}
               az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/manifest.json' --content-type 'application/json' --overwrite
               az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/catalog.json' --content-type 'application/json' --overwrite
               az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/index.html' --content-type 'text/html' --overwrite
@@ -87,8 +91,8 @@ runs:
               echo "Adding this IP address to rules: $myIP"
               echo "AGENT_IP=$(echo $myIP | tr / -)" >> $GITHUB_ENV
               az storage account network-rule add --resource-group ${{ inputs.resource-group }} --account-name ${{ inputs.storage-account }} --ip-address $myIP
-              echo " ==> Sleep for 30 seconds to allow the firewall change to take "
-              sleep 30
+              echo " ==> Sleep for ${{ inputs.waitPeriod }} seconds to allow the firewall change to take "
+              sleep ${{ inputs.waitPeriod }}
               az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/manifest.json' -c '${{inputs.container}}' -n 'manifest.json' --content-type 'application/json' --overwrite
               az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/catalog.json' -c '${{inputs.container}}' -n 'catalog.json' --content-type 'application/json' --overwrite
               az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n 'index.html' --content-type 'text/html' --overwrite
