@@ -31,7 +31,7 @@ steps:
 
   - bash: |
       source $DBT_ENV_NAME/bin/activate
-      dbt run-operation ${{ parameters.operation_name }} --args '${{ parameters.operation_args }}' --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test 
+      dbt run-operation ${{ parameters.operation_name }} --args '${{ parameters.operation_args }}' --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
     displayName: Run dbt with unit-tests
     condition: and(succeeded(), eq('${{ parameters.target }}', 'unit-test'))
     workingDirectory: ${{ parameters.working_directory }}
