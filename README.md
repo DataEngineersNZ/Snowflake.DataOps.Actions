@@ -24,6 +24,7 @@ Github Actions Designed to work with the workflows created for the Data Engineer
 | DataEngineersNZ/Snowflake.DataOps.Actions/tasks/dbt-manifest-destroy       |             |       |
 | DataEngineersNZ/Snowflake.DataOps.Actions/tasks/dbt-manifest-download      |             |       |
 | DataEngineersNZ/Snowflake.DataOps.Actions/tasks/dbt-manifest-upload        |             |       |
+| DataEngineersNZ/Snowflake.DataOps.Actions/tasks/dbt-run-operation          |             |       |
 | DataEngineersNZ/Snowflake.DataOps.Actions/tasks/dbt-source-freshness       |             |       |
 | DataEngineersNZ/Snowflake.DataOps.Actions/tasks/dbt-test                   |             |       |
 
