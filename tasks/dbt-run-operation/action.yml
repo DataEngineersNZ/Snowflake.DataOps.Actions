@@ -55,7 +55,7 @@ runs:
     - name: Run DBT Operation
       shell: pwsh
       run: |
-        dbt run-operation ${{ inputs.operation-name }} --args '{{ inputs.operation-args }}' --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
+        dbt run-operation ${{ inputs.operation-name }} --args '{ ${{ inputs.operation-args }} }' --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
