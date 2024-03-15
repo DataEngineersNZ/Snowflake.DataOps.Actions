@@ -19,19 +19,10 @@ parameters:
 
 steps:
 
-  - powershell: |
-        if(Test-Path -Path "partial_parse.msgpack") {
-          Remove-Item -Path "partial_parse.msgpack" -Force
-        }
-        if(Test-Path -Path "graph.gpickle") {
-          Remove-Item -Path "graph.gpickle" -Force
-        }
-    displayName: Clean Target
-    workingDirectory: ${{ parameters.working_directory }}/target
 
   - bash: |
       source $DBT_ENV_NAME/bin/activate
-      dbt run-operation ${{ parameters.operation_name }} --args '${{ parameters.operation_args }}' --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+      dbt run-operation ${{ parameters.operation_name }} --args '{ ${{ parameters.operation_args }} }' --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
     displayName: Run dbt with unit-tests
     condition: and(succeeded(), eq('${{ parameters.target }}', 'unit-test'))
     workingDirectory: ${{ parameters.working_directory }}
