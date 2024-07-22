@@ -15,14 +15,20 @@ parameters:
   - name: archive_outputs
     type: boolean
     default: false
+  - name: data_tests
+    type: boolean
+    default: true
+  - name: unit_tests
+    type: boolean
+    default: true
 
 steps:
 
   - bash: |
-      source $DBT_ENV_NAME/bin/activate  
-      dbt test --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }} --exclude tag:unit_test
-    displayName: Run dbt Schema Only Tests
-    condition: and(succeeded(), ne('${{ parameters.target }}', 'unit-test'))
+      source $DBT_ENV_NAME/bin/activate
+      dbt test --select test_type:data --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+    displayName: Run dbt Data Tests
+    condition: and(succeeded(), ${{ parameters.data_tests }})
     workingDirectory: ${{ parameters.working_directory }}
     env:
       DBT_ENV_NAME: ${{ parameters.env_name }}
@@ -32,13 +38,13 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-privatekey-passphrase: $(snowflake-privatekey-password)
+      snowflake-private-key-password: $(snowflake-private-key-password)
 
   - bash: |
-      source $DBT_ENV_NAME/bin/activate  
-      dbt test --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
-    displayName: Run dbt Schema Tests and unit-tests
-    condition: and(succeeded(), eq('${{ parameters.target }}', 'unit-test'))
+      source $DBT_ENV_NAME/bin/activate
+      dbt test --select test_type:unit --profiles-dir=${{ parameters.profiles_directory }} --target=${{ parameters.target }}
+    displayName: Run dbt Unit Tests
+    condition: and(succeeded(), ${{ parameters.unit_tests }})
     workingDirectory: ${{ parameters.working_directory }}
     env:
       DBT_ENV_NAME: ${{ parameters.env_name }}
@@ -48,7 +54,7 @@ steps:
       snowflake-password: ${{ parameters.snowflake_authenticator_value }}
       snowflake-warehouse: $(snowflake-warehouse)
       snowflake-role: $(snowflake-role)
-      snowflake-privatekey-passphrase: $(snowflake-privatekey-password)
+      snowflake-private-key-password: $(snowflake-private-key-password)
 
   - task: PublishPipelineArtifact@1
     displayName: Archive dbt test results

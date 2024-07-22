@@ -35,15 +35,23 @@ inputs:
     description: Whether to archive test results
     required: false
     default: 'false'
+  data-tests:
+    description: Whether to run data tests
+    required: false
+    default: 'true'
+  unit-tests:
+    description: Whether to run unit tests
+    required: false
+    default: 'true'
 
 runs:
   using: "composite"
   steps:
-    - name: Run DBT Schema Only Tests
-      if: inputs.target  != 'unit-test'
+    - name: Run DBT Data Tests
+      if: ${{ inputs.data-tests == 'true' }}
       shell: bash
       run: |
-        dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
+        dbt test --select test_type:data --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
@@ -54,11 +62,11 @@ runs:
         snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
         snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
-    - name: Run DBT Schema Tests and unit-tests
-      if: inputs.target  == 'unit-test'
+    - name: Run DBT Unit Tests
+      if: ${{ inputs.unit-tests == 'true' }}
       shell: bash
       run: |
-        dbt test --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
+        dbt test --select test_type:unit --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
@@ -74,5 +82,5 @@ runs:
       if: ${{ inputs.archive-outputs == 'true' }}
       with:
           name: dbt-test-results
-          path: 
+          path:
             ${{ inputs.working-directory }}/target/run_results.json
