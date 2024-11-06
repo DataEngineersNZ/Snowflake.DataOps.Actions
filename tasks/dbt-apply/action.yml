@@ -31,6 +31,10 @@ inputs:
   snowflake-target-database:
     description: The snowflake target database to use
     required: true
+  additional_flag:
+    description: Additional flags to pass to the dbt command
+    required: false
+    default: ''
 
 runs:
   using: "composite"
@@ -54,10 +58,10 @@ runs:
         dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude path:seeds/unit_tests --full-refresh
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
           echo " ==> Previous Manifest file found, running dbt run for release"
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test ${{ inputs.additional_flag }}
         } else {
             echo " ==> No Previous Manifest file found, running dbt run fo release"
-            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
+            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test ${{ inputs.additional_flag }}
         }
       working-directory: ${{ inputs.working-directory }}
       env:
@@ -77,10 +81,10 @@ runs:
         dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --full-refresh
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
           echo " ==> Previous Manifest file found, running dbt run for unit tests"
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
+          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} ${{ inputs.additional_flag }}
         } else {
           echo " ==> No Previous Manifest file found, running dbt run for unit tests"
-          dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
+          dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} ${{ inputs.additional_flag }}
         }
 
       working-directory: ${{ inputs.working-directory }}
