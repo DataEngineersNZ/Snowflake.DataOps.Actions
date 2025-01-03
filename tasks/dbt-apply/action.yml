@@ -35,11 +35,19 @@ inputs:
     description: Additional flags to pass to the dbt command
     required: false
     default: ''
+  run_compile:
+    description: Run dbt compile
+    required: false
+    default: true
+  run_seed:
+    description: Run dbt seed
+    required: false
+    default: true
 
 runs:
   using: "composite"
   steps:
-    - name: Clean target
+    - name: Clean targets
       shell: pwsh
       run: |
          if(Test-Path -Path ".\target\partial_parse.msgpack") {
@@ -50,19 +58,11 @@ runs:
          }
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Run DBT without Unit-tets
-      if: inputs.target  != 'unit-test'
+    - name: dbt Compile
+      if: ${{ inputs.run_compile == 'true' }}
       shell: pwsh
       run: |
-        dbt compile --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
-        dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude path:seeds/unit_tests --full-refresh
-        if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
-          echo " ==> Previous Manifest file found, running dbt run for release"
-          dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test ${{ inputs.additional_flag }}
-        } else {
-            echo " ==> No Previous Manifest file found, running dbt run fo release"
-            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test ${{ inputs.additional_flag }}
-        }
+        dbt compile --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
@@ -73,20 +73,32 @@ runs:
         snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
         snowflake-privatekey-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
-    - name: Run DBT with unit-tests
-      if: inputs.target  == 'unit-test'
+    - name: dbt Seed
+      if: ${{ inputs.run_seed == 'true' }}
       shell: pwsh
       run: |
-        dbt compile --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --exclude tag:unit_test
         dbt seed --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} --full-refresh
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        snowflake-account: ${{ inputs.snowflake-account }}
+        snowflake-username: ${{ inputs.snowflake-username }}
+        snowflake-role: ${{ inputs.snowflake-role }}
+        snowflake-warehouse: ${{ inputs.snowflake-warehouse }}
+        snowflake-target-database: ${{ inputs.snowflake-target-database }}
+        snowflake-authenticator-value: ${{ inputs.snowflake-authenticator-value }}
+        snowflake-privatekey-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
+
+    - name: dbt Run
+      if: inputs.target  != 'unit-test'
+      shell: pwsh
+      run: |
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
-          echo " ==> Previous Manifest file found, running dbt run for unit tests"
+          echo " ==> Previous Manifest file found, running dbt run for release"
           dbt run -s state:modified --defer --state . --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} ${{ inputs.additional_flag }}
         } else {
-          echo " ==> No Previous Manifest file found, running dbt run for unit tests"
-          dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }} ${{ inputs.additional_flag }}
+            echo " ==> No Previous Manifest file found, running dbt run fo release"
+            dbt run --profiles-dir=${{ inputs.profiles-directory }} --target=${{ inputs.target }}  ${{ inputs.additional_flag }}
         }
-
       working-directory: ${{ inputs.working-directory }}
       env:
         snowflake-account: ${{ inputs.snowflake-account }}
