@@ -89,7 +89,6 @@ runs:
         snowflake-privatekey-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: dbt Run
-      if: inputs.target  != 'unit-test'
       shell: pwsh
       run: |
         if(Test-Path -Path ".\manifest.json" -PathType Leaf) {
