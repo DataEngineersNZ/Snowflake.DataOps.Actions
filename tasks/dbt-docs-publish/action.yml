@@ -1,9 +1,9 @@
 name: Publish Dbt Docs to Azure Storage
 description: Publish the dbt docs to Azure Storage
 inputs:
-  azure_credentials:
-    description: The azure azure_credentials to be used 
-    required: true
+  use_azure_federated_login:
+    description: Specifies if the action should use Azure Federated Login or Azure Service Principal ClientID/ClientSecret
+    default: false
   target-directory:
     description: The directory where the DBT output is located
     required: true
@@ -29,6 +29,9 @@ inputs:
     required: false
     default: 30
 
+permissions:
+  id-token: write
+  contents: read
 runs:
   using: "composite"
   steps:
@@ -51,9 +54,19 @@ runs:
           echo "CATALOG_FILE=$(echo ${{ env.BRANCH_NAME }}/catalog.json)" >> $GITHUB_ENV
 
       - name: Authenticate to Azure as a Service Principal
-        uses: azure/login@v1
+        uses: azure/login@v2
+        condition: ${{ inputs.use_azure_federated_login == 'false' }}
         with:
-          creds: ${{ inputs.azure_credentials }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Authenticate to Azure as a Service Principal (ODIC)
+        uses: azure/login@v2
+        condition: ${{ inputs.use_azure_federated_login == 'true' }}
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
 
       - name: Find and replace the placeholders
         shell: pwsh
@@ -67,7 +80,7 @@ runs:
 
 
       - name: Upload DBT Docs to subfolder
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         if: inputs.branchBasedFolder == 'yes'
         with:
           inlineScript: |
@@ -83,7 +96,7 @@ runs:
               az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/index.html' --content-type 'text/html' --overwrite
 
       - name: Upload DBT Docs
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         if: inputs.branchBasedFolder == 'no'
         with:
           inlineScript: |
@@ -98,7 +111,7 @@ runs:
               az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n 'index.html' --content-type 'text/html' --overwrite
 
       - name: add the IP address of the agent to the allowed list
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         if: always()
         with:
           inlineScript: |

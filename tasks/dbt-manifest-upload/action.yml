@@ -1,9 +1,9 @@
 name: Upload Manifest File to Azure Storage
 description: Uploads the dbt manifest.json to Azure Storage
 inputs:
-  azure_credentials:
-    description: The azure azure_credentials to be used 
-    required: true
+  use_azure_federated_login:
+    description: Specifies if the action should use Azure Federated Login or Azure Service Principal ClientID/ClientSecret
+    default: false
   target-directory:
     description: The directory where the DBT output is located
     required: true
@@ -20,16 +20,29 @@ inputs:
     description: The name of the database to get the manifest for
     required: true
 
+permissions:
+  id-token: write
+  contents: read
 runs:
   using: "composite"
   steps:
       - name: Authenticate to Azure as a Service Principal
-        uses: azure/login@v1
+        uses: azure/login@v2
+        condition: ${{ inputs.use_azure_federated_login == 'false' }}
         with:
-          creds: ${{ inputs.azure_credentials }}           
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Authenticate to Azure as a Service Principal (ODIC)
+        uses: azure/login@v2
+        condition: ${{ inputs.use_azure_federated_login == 'true' }}
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
 
       - name: Upload DBT Manifest for database
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           azcliversion: latest
           inlineScript: |
