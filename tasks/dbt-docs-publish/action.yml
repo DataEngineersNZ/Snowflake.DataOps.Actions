@@ -67,13 +67,13 @@ runs:
 
       - name: Authenticate to Azure as a Service Principal
         uses: azure/login@v2
-        condition: ${{ inputs.use-azure-federated-login == 'false' }}
+        if: ${{ inputs.use-azure-federated-login == 'false' }}
         with:
           creds: ${{ inputs.azure-credentials }}
 
       - name: Authenticate to Azure as a Service Principal (ODIC)
         uses: azure/login@v2
-        condition: ${{ inputs.use-azure-federated-login == 'true' }}
+        if: ${{ inputs.use-azure-federated-login == 'true' }}
         with:
           client-id: ${{ inputs.azure-client-id }}
           tenant-id: ${{ inputs.azure-tenant-id }}
