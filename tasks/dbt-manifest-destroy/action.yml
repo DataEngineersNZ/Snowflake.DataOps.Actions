@@ -1,9 +1,9 @@
 name: Removes the Manifest for the database
 description: Removes an existing dbt manifest.json from the storage account
 inputs:
-  azure_credentials:
-    description: The azure azure_credentials to be used 
-    required: true
+  use-azure-federated-login:
+    description: Specifies if the action should use Azure Federated Login or Azure Service Principal ClientID/ClientSecret
+    default: false
   resource-group:
     description: The resource group where the storage account is located
     required: true
@@ -13,17 +13,43 @@ inputs:
   snowflake-target-database:
     description: The name of the database to set the manifest for
     required: true
+  azure-credentials:
+    description: The Azure credentials to use for authentication
+    required: false
+  azure-client-id:
+    description: The Azure client ID to use for authentication
+    required: false
+  azure-tenant-id:
+    description: The Azure tenant ID to use for authentication
+    required: false
+  azure-subscription-id:
+    description: The Azure subscription ID to use for authentication
+    required: false
 
+permissions:
+  id-token: write
+  contents: read
 runs:
   using: "composite"
   steps:
       - name: Authenticate to Azure as a Service Principal
-        uses: azure/login@v1
+        uses: azure/login@v2
+        if: ${{ inputs.use-azure-federated-login == 'false' }}
         with:
-          creds: ${{ inputs.azure_credentials }}           
+          creds: ${{ inputs.azure-credentials }}
+
+      - name: Authenticate to Azure as a Service Principal (ODIC)
+        uses: azure/login@v2
+        if: ${{ inputs.use-azure-federated-login == 'true' }}
+        with:
+          client-id: ${{ inputs.azure-client-id }}
+          tenant-id: ${{ inputs.azure-tenant-id }}
+          subscription-id: ${{ inputs.azure-subscription-id }}
+          enable-AzPSSession: true
+
 
       - name: Clone Manifest file
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           inlineScript: |
               if $(az storage blob exists --container-name 'manifests' --name ${{ inputs.snowflake-target-database }}_manifest.json --account-name ${{ inputs.storage-account }} --query exists --auth-mode login)
@@ -34,9 +60,9 @@ runs:
                   --container-name 'manifests' \
                   --name '${{ inputs.snowflake-target-database }}_manifest.json' \
                   --delete-snapshots include \
-                  --auth-mode login  
+                  --auth-mode login
               fi
-   
+
       # Azure logout
       - name: logout
         shell: bash

@@ -78,7 +78,7 @@ runs:
         snowflake-private-key-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: Archive Dbt Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ inputs.archive-outputs == 'true' }}
       with:
           name: dbt-test-results

@@ -54,7 +54,7 @@ runs:
         snowflake-privatekey-passphrase: ${{ inputs.snowflake-privatekey-passphrase }}
 
     - name: Archive Dbt Docs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ inputs.archive-outputs == 'true' }}
       with:
           name: dbt-docs

@@ -1,9 +1,9 @@
 name: Publish Dbt Docs to Azure Storage
 description: Publish the dbt docs to Azure Storage
 inputs:
-  azure_credentials:
-    description: The azure azure_credentials to be used 
-    required: true
+  use-azure-federated-login:
+    description: Specifies if the action should use Azure Federated Login or Azure Service Principal ClientID/ClientSecret
+    default: false
   target-directory:
     description: The directory where the DBT output is located
     required: true
@@ -28,7 +28,22 @@ inputs:
     description: The number of seconds to wait before removing the IP address from the firewall
     required: false
     default: 30
+  azure-credentials:
+    description: The Azure credentials to use for authentication
+    required: false
+  azure-client-id:
+    description: The Azure client ID to use for authentication
+    required: false
+  azure-tenant-id:
+    description: The Azure tenant ID to use for authentication
+    required: false
+  azure-subscription-id:
+    description: The Azure subscription ID to use for authentication
+    required: false
 
+permissions:
+  id-token: write
+  contents: read
 runs:
   using: "composite"
   steps:
@@ -51,9 +66,20 @@ runs:
           echo "CATALOG_FILE=$(echo ${{ env.BRANCH_NAME }}/catalog.json)" >> $GITHUB_ENV
 
       - name: Authenticate to Azure as a Service Principal
-        uses: azure/login@v1
+        uses: azure/login@v2
+        if: ${{ inputs.use-azure-federated-login == 'false' }}
         with:
-          creds: ${{ inputs.azure_credentials }}
+          creds: ${{ inputs.azure-credentials }}
+
+      - name: Authenticate to Azure as a Service Principal (ODIC)
+        uses: azure/login@v2
+        if: ${{ inputs.use-azure-federated-login == 'true' }}
+        with:
+          client-id: ${{ inputs.azure-client-id }}
+          tenant-id: ${{ inputs.azure-tenant-id }}
+          subscription-id: ${{ inputs.azure-subscription-id }}
+          enable-AzPSSession: true
+
 
       - name: Find and replace the placeholders
         shell: pwsh
@@ -67,7 +93,7 @@ runs:
 
 
       - name: Upload DBT Docs to subfolder
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         if: inputs.branchBasedFolder == 'yes'
         with:
           inlineScript: |
@@ -83,7 +109,7 @@ runs:
               az storage blob upload --account-name ${{ inputs.storage-account }} --auth-mode login  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n '${{ env.BRANCH_NAME }}/index.html' --content-type 'text/html' --overwrite
 
       - name: Upload DBT Docs
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         if: inputs.branchBasedFolder == 'no'
         with:
           inlineScript: |
@@ -98,7 +124,7 @@ runs:
               az storage blob upload --account-name ${{ inputs.storage-account }}  -f '${{ inputs.working-directory }}/${{ inputs.target-directory }}/index.html' -c '${{inputs.container}}' -n 'index.html' --content-type 'text/html' --overwrite
 
       - name: add the IP address of the agent to the allowed list
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         if: always()
         with:
           inlineScript: |

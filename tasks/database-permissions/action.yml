@@ -103,7 +103,7 @@ runs:
         $fileName = "./schemaresults.json"
 
         $schemaObjects = Get-Content -Raw -Path $fileName | ConvertFrom-Json
-        
+
         $schemaObjects |  ForEach-Object {
             $schema=  $_.SCHEMA_NAME.toLower()
             $statements.Add(-JOIN("GRANT OWNERSHIP ON SCHEMA ", $schema , " TO ROLE ",$new_role, " REVOKE CURRENT GRANTS;"))
@@ -136,7 +136,7 @@ runs:
         $fileName = "./maskingpolicies.json"
 
         $schemaObjects = Get-Content -Raw -Path $fileName | ConvertFrom-Json
-        
+
         $schemaObjects |  ForEach-Object {
             $schema=  $_.SCHEMA_NAME.toLower()
             $policy= $_.NAME.toLower()
@@ -152,7 +152,7 @@ runs:
 
 
     - name: Archive Permission Details
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ inputs.archive-outputs == 'true' }}
       with:
           name: permissions
