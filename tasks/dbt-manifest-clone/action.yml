@@ -16,6 +16,18 @@ inputs:
   snowflake-target-database:
     description: The name of the database to set the manifest for
     required: true
+  azure-credentials:
+    description: The Azure credentials to use for authentication
+    required: false
+  azure-client-id:
+    description: The Azure client ID to use for authentication
+    required: false
+  azure-tenant-id:
+    description: The Azure tenant ID to use for authentication
+    required: false
+  azure-subscription-id:
+    description: The Azure subscription ID to use for authentication
+    required: false
 
 permissions:
   id-token: write
@@ -27,16 +39,17 @@ runs:
         uses: azure/login@v2
         condition: ${{ inputs.use-azure-federated-login == 'false' }}
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ inputs.azure-credentials }}
 
       - name: Authenticate to Azure as a Service Principal (ODIC)
         uses: azure/login@v2
         condition: ${{ inputs.use-azure-federated-login == 'true' }}
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ inputs.azure-client-id }}
+          tenant-id: ${{ inputs.azure-tenant-id }}
+          subscription-id: ${{ inputs.azure-subscription-id }}
           enable-AzPSSession: true
+
 
       - name: Clone Manifest file
         uses: azure/CLI@v2
