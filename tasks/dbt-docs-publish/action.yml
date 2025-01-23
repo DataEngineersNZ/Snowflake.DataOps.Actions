@@ -1,7 +1,7 @@
 name: Publish Dbt Docs to Azure Storage
 description: Publish the dbt docs to Azure Storage
 inputs:
-  use_azure_federated_login:
+  use-azure-federated-login:
     description: Specifies if the action should use Azure Federated Login or Azure Service Principal ClientID/ClientSecret
     default: false
   target-directory:
@@ -55,13 +55,13 @@ runs:
 
       - name: Authenticate to Azure as a Service Principal
         uses: azure/login@v2
-        condition: ${{ inputs.use_azure_federated_login == 'false' }}
+        condition: ${{ inputs.use-azure-federated-login == 'false' }}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Authenticate to Azure as a Service Principal (ODIC)
         uses: azure/login@v2
-        condition: ${{ inputs.use_azure_federated_login == 'true' }}
+        condition: ${{ inputs.use-azure-federated-login == 'true' }}
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
